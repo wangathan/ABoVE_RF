@@ -15,6 +15,7 @@ library(doParallel)
 library(ranger)
 #library(edarf)
 library(treeClust)
+library(raster)
 
 set.seed(1337)
 print(Sys.time())
@@ -36,16 +37,30 @@ labelsdt = rbindlist(lapply(labelfs,fread), use.names=T)
 setkey(coefsdt, set, samp)
 setkey(labelsdt, tile,samp)
 
-coefs_labels = coefsdt[labelsdt, nomatch=0]
+getPZI = function(i,dt){
+  
+  ti = dt[i, tile]
+  px = dt[i, px]
+  py = dt[i, py]
+  
+  if(!file.exists(paste0("../../data/PZI/tiles/",ti,"_PZI.tif")))
+    return(NA)
+  PZI_tile = raster(paste0("../../data/PZI/tiles/",ti,"_PZI.tif"))
+  
+  PZI = PZI_tile[px+1,py+1]
+  return(PZI)
+}
+
 #coefs_labels = coefsdt
 # i dont' know why the first one is NA row... drop it
 # coefs_labels = coefs_labels[-1,]
+coefs_labels = coefsdt[labelsdt, nomatch=0]
 
 # intersect year and segment range
-#coefs_labels[, overlap := (year >= yr_start & year <= yr_end)]
-#coefs_labels[, postyear := (year > 2014)]
+coefs_labels[, overlap := (year >= yr_start & year <= yr_end)]
+coefs_labels[, postyear := (year > 2014)]
 
-#coefs_labels = coefs_labels[(overlap | postyear) & skipped == 0 & surfaceType != 0,]
+coefs_labels = coefs_labels[(overlap | postyear) & skipped == 0 & surfaceType != 0,]
 
 # get rid of soem garbage
 coefs_labels[, c("completed", "leafType", "whySkipped") := NULL]
@@ -127,6 +142,8 @@ featureNames_coefs = coefsnames[grepl("robust",coefsnames)]
 
 # tree clust is okay with missing values?
 #coefs_labels = na.omit(coefs_labels)
+
+allPZI = mclapply(1:nrow(coefs_labels),getPZI,dt=coefs_labels,mc.cores=detectCores())
 
 save(featureNames, file = "../../data/rf/featureNames")
 
