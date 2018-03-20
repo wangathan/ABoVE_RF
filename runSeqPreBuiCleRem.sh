@@ -13,7 +13,7 @@ qsub -N prd_$1 runPredict.sh $1 $2
 qsub -N cln_$1 -hold_jid prd_$1 runClean.sh $1 $2
 
 # build
-qsub -n bld_$1 -hold_jid cln_$1 runbuildmap.sh $1 $2
+qsub -N bld_$1 -hold_jid cln_$1 runBuildMap.sh $1 $2
 ## build quick fix
 #qsub -N bld_$1 runBuildMap.sh $1 $2
 

@@ -38,18 +38,55 @@
 #sbatch -J rmp_Bh13v09 -o rmp_Bh13v09 runRemapPlotPlot.sh Bh13v09 tc_20180219_k25_mn_sub_pam_rf
 #sbatch -J rmp_Bh14v07 -o rmp_Bh14v07 runRemapPlotPlot.sh Bh14v07 tc_20180219_k25_mn_sub_pam_rf
 
-qsub -N rmp_Bh10v11 runRemapPlot.sh Bh10v11 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh14v12 runRemapPlot.sh Bh14v12 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh12v12 runRemapPlot.sh Bh12v12 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh09v08 runRemapPlot.sh Bh09v08 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh13v08 runRemapPlot.sh Bh13v08 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh12v08 runRemapPlot.sh Bh12v08 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh10v15 runRemapPlot.sh Bh10v15 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh12v11 runRemapPlot.sh Bh12v11 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh14v11 runRemapPlot.sh Bh14v11 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh11v15 runRemapPlot.sh Bh11v15 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh15v11 runRemapPlot.sh Bh15v11 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh13v07 runRemapPlot.sh Bh13v07 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh12v10 runRemapPlot.sh Bh12v10 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh13v11 runRemapPlot.sh Bh13v11 tc_20180219_k25_mn_sub_pam_rf
-qsub -N rmp_Bh12v15 runRemapPlot.sh Bh12v15 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh10v11 runRemapPlot.sh Bh10v11 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh14v12 runRemapPlot.sh Bh14v12 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh12v12 runRemapPlot.sh Bh12v12 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh09v08 runRemapPlot.sh Bh09v08 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh13v08 runRemapPlot.sh Bh13v08 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh12v08 runRemapPlot.sh Bh12v08 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh10v15 runRemapPlot.sh Bh10v15 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh12v11 runRemapPlot.sh Bh12v11 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh14v11 runRemapPlot.sh Bh14v11 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh11v15 runRemapPlot.sh Bh11v15 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh15v11 runRemapPlot.sh Bh15v11 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh13v07 runRemapPlot.sh Bh13v07 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh12v10 runRemapPlot.sh Bh12v10 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh13v11 runRemapPlot.sh Bh13v11 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh12v15 runRemapPlot.sh Bh12v15 tc_20180219_k25_mn_sub_pam_rf
+
+#qsub -N rmp_Bh04v05 runRemapPlot.sh Bh04v05 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh14v08 runRemapPlot.sh Bh14v08 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh06v04 runRemapPlot.sh Bh06v04 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh07v03 runRemapPlot.sh Bh07v03 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh08v06 runRemapPlot.sh Bh08v06 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh04v03 runRemapPlot.sh Bh04v03 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh02v05 runRemapPlot.sh Bh02v05 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh03v06 runRemapPlot.sh Bh03v06 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh05v04 runRemapPlot.sh Bh05v04 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh07v05 runRemapPlot.sh Bh07v05 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh09v07 runRemapPlot.sh Bh09v07 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh08v04 runRemapPlot.sh Bh08v04 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh11v07 runRemapPlot.sh Bh11v07 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh09v06 runRemapPlot.sh Bh09v06 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh11v06 runRemapPlot.sh Bh11v06 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh09v02 runRemapPlot.sh Bh09v02 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh07v07 runRemapPlot.sh Bh07v07 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh08v07 runRemapPlot.sh Bh08v07 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh01v03 runRemapPlot.sh Bh01v03 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh04v04 runRemapPlot.sh Bh04v04 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh09v03 runRemapPlot.sh Bh09v03 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh05v06 runRemapPlot.sh Bh05v06 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh06v07 runRemapPlot.sh Bh06v07 tc_20180219_k25_mn_sub_pam_rf
+#qsub -N rmp_Bh08v05 runRemapPlot.sh Bh08v05 tc_20180219_k25_mn_sub_pam_rf
+
+qsub -N rmp_Bh10v05 runRemapPlot.sh Bh10v05 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh10v06 runRemapPlot.sh Bh10v06 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh10v14 runRemapPlot.sh Bh10v14 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh11v12 runRemapPlot.sh Bh11v12 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh12v06 runRemapPlot.sh Bh12v06 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh12v13 runRemapPlot.sh Bh12v13 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh13v03 runRemapPlot.sh Bh13v03 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh13v05 runRemapPlot.sh Bh13v05 tc_20180219_k25_mn_sub_pam_rf
+qsub -N rmp_Bh13v12 runRemapPlot.sh Bh13v12 tc_20180219_k25_mn_sub_pam_rf
+
+

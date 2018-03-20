@@ -39,8 +39,12 @@ print(rfid)
 		fout = paste0("../../data/rf/predict_",rfid,"/clean_predict/",ti,"/",mapyear,"/",basename(fi),"_clean_",mapyear)
 		if(file.exists(fout))return(NULL)
 
-		fpy = as.numeric(strsplit(fi,"_")[[1]][9])
-		realpy = fpy*2
+    # make it to always pick the prediction index correctly based on the name
+    splitting= strsplit(fi,"_")[[1]]
+    predictindex=grep("rfpredict",splitting)
+    fpy = as.numeric(splitting[predictindex+1])
+    
+    realpy = fpy*2
 
 		# each feather covers two py and all px (0:5999)
 		# check that they all exist
@@ -52,14 +56,14 @@ print(rfid)
 		setkey(lcdt, py, px)		
 
 		rowpxpy = merge(rowpxpy,lcdt,all=T)
-		rm(lcdt)
+		#rm(lcdt)
 
 		# get missing rows and attempt to assign nearest-time-neighbor lc
 		napxpy = rowpxpy[is.na(lcmap),]
 		newlc <- sapply(1:nrow(napxpy), function(x)nafiller(napxpy[x,px],napxpy[x,py],mapyear,indt[px==napxpy[x,px] & py==napxpy[x,py],]))
 		napxpy[, lcmap := newlc]
-		rm(newlc)
-		rm(indt)
+		#rm(newlc)
+		#rm(indt)
 
 		# so we don't hang on to the NA values
 		rowpxpy = na.omit(rowpxpy)
@@ -76,29 +80,30 @@ print(rfid)
 		rowpxpy_dup = rowpxpy[dupes > 1,]
 		
 
-		# if there are duplicates, pick the longer segment
+		# if there are duplicates, pick the newest segment
 		if(nrow(rowpxpy_dup) > 0){
-			rowpxpy_dup[,longerseg := (seglength == max(seglength)), by = c("px","py")]
+			#rowpxpy_dup[,longerseg := (seglength == max(seglength)), by = c("px","py")]
 			# if both segments are the same length, pick the earlier one
 			rowpxpy_dup[,earlier := (yr_start == min(yr_start)), by = c("px", "py")]
-			
-			rowpxpy_dedupe = rowpxpy_dup[longerseg==TRUE,]
+			rowpxpy_dedupe = rowpxpy_dup[earlier!=TRUE,]
+			#rowpxpy_dedupe = rowpxpy_dup[longerseg==TRUE,]
 			
 			# another dupe check to break seglength ties
-			rowpxpy_dedupe[,dupes := .N, by = c("px","py")]
+			#rowpxpy_dedupe[,dupes := .N, by = c("px","py")]
 
-			rowpxpy_dedupe_u = rowpxpy_dedupe[dupes==1,]
-			rowpxpy_dedupe_dup = rowpxpy_dedupe[dupes>1,]
+			#rowpxpy_dedupe_u = rowpxpy_dedupe[dupes==1,]
+			#rowpxpy_dedupe_dup = rowpxpy_dedupe[dupes>1,]
 
-			rowpxpy_dedupe_dedupe = rowpxpy_dedupe_dup[earlier==TRUE,]
+			#rowpxpy_dedupe_dedupe = rowpxpy_dedupe_dup[earlier==TRUE,]
 		
 			rowpxpy = rbindlist(list(rowpxpy_u[,.(py,px,lcmap)],
-															 rowpxpy_dedupe_u[,.(py,px,lcmap)], # seglenth used to break year ties
-															 rowpxpy_dedupe_dedupe[,.(py,px,lcmap)], # seglength ties are broken
+                               rowpxpy_dedupe[,.(py,px,lcmap)],
+															 #rowpxpy_dedupe_u[,.(py,px,lcmap)], # seglenth used to break year ties
+															 #rowpxpy_dedupe_dedupe[,.(py,px,lcmap)], # seglength ties are broken
 															 napxpy[,.(py,px,lcmap)]))
 			rm(rowpxpy_u)
-			rm(rowpxpy_dedupe_u)
-			rm(rowpxpy_dedupe_dedupe)
+			#rm(rowpxpy_dedupe_u)
+			#rm(rowpxpy_dedupe_dedupe)
 		}else{
 			rowpxpy = rbindlist(list(rowpxpy[,.(py,px,lcmap)],
 																napxpy[,.(py,px,lcmap)]))
@@ -134,7 +139,8 @@ print(rfid)
 
 		if(min(pxlist$yeardiff) > 5)return(NA)
 
-		# pick the closest one
+		# pick the closest one and don't pick backwards
+    pxlist = pxlist[yr_start >= mapyear,]
 		closelc = pxlist[yeardiff == min(pxlist$yeardiff),lcmap]
 		return(closelc[1])
 
@@ -143,8 +149,7 @@ print(rfid)
 
 
 	rffiles = list.files(paste0("../../data/rf/predict_",rfid,"/",ti),
-											 full.names=T)#,
-											 #pattern="shade")
+											 full.names=T)
 
 for(mapyear in 1985:2014){
 

@@ -3,15 +3,14 @@
 #		take a set of clusterings and data and determine some spectral profiles of each cluster	
 #
 #
-require(caret)
-require(DMwR)
+#require(caret)
+#require(DMwR)
 library(randomForest)
-library(unbalanced)
+#library(unbalanced)
 library(data.table)
 library(foreach)
 library(doParallel)
-library(ranger)
-library(edarf)
+#library(ranger)
 
 assignLambda = function(x){
 	if(x=="blue")return(0.485)
@@ -33,6 +32,8 @@ assignLambda = function(x){
 	if(x=="seglength")return(5.5)
 	if(x=="snowiness")return(5.75)
 	if(x=="cloudiness")return(6)
+	if(x=="GSL")return(8.75)
+	if(x=="PZI")return(8.5)
 	if(x=="snowmelt")return(8.25)
 	if(x=="snowfall")return(8)
 	if(x=="elv")return(6.25)
@@ -47,11 +48,13 @@ assignLambda = function(x){
 banddt = data.table(lambda = c(0.485, 0.56, 0.66, 0.84, 1.65, 2.4, 3,
 															 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
 															 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7,
-															 7.25, 7.5, 7.75, 8, 8.25, 8.5, 8.75, 9),
+															 7.25, 7.5, 7.75, 8, 8.25, 8.5, 8.75, 9,
+                               9.25, 9.5),
 										band = c("blue", "green", "red", "nir", "swir1", "swir2", "bt",
 														 "ndvi", "evi", "nbrevi", "nbr", "tcg", "tcb", "tcw",
 														 "tcwgd", "bcc", "gcc", "rcc", "elv", "asp", "slp",
-														 "nbreaks", "seglength", "snowiness","cloudiness", "snowmelt", "snowfall", "swocc", "swrec", "swsea", "swext")) 
+														 "nbreaks", "seglength", "snowiness","cloudiness", "snowmelt", "snowfall", "swocc", "swrec", "swsea", "swext",
+                             "PZI", "GSL")) 
 														 
 
 
@@ -92,7 +95,8 @@ clustPlotter = function(clustRange, medoidmelt){
 # coefsdt = fread("../../data/features/featureSet_20171201_hasFilterAndEcozAndDEMAndSW.csv")
 # coefsdt = fread("../../data/features/featureSet_20180111_hasFilterAndEcozAndDEMAndSWAndChrom.csv")
 # coefs_labels = get(load("../../data/rf/clusters/tc_20180219_k30_dt"))
-coefs_labels = get(load("../../data/rf/clusters/tc_20180219_k20_dt_sub"))
+coefs_labels = get(load("../../data/rf/clusters/tc_20180319_k50_dt"))
+#coefs_labels = get(load("../../data/rf/clusters/tc_20180219_k20_dt_sub"))
 
 # water
 coefs_labels[(surfaceType == 1) | 
@@ -166,7 +170,8 @@ library(cluster)
 #clusters_pam20 = get(load("../../data/rf/clusters_20171201/clusters_pam20"))
 #A
 #clusters_clara28 = get(load("../../data/rf/clusters/tc_20180219_k30_d4"))
-clusters_clara20sub = get(load("../../data/rf/clusters/tc_20180219_k20_d4_sub"))
+#clusters_clara20sub = get(load("../../data/rf/clusters/tc_20180219_k20_d4_sub"))
+clusters_pam50 = get(load("../../data/rf/clusters/tc_20180319_k50_d4"))
 featureNames = names(coefs_labels)
 featureNames = featureNames[!grepl("pam35|LCMAP|rowi|surfaceType|vegForm|phenotype|under|density|wetlandFlag|landUse|year|confidence|skipped",featureNames)]
 
@@ -184,7 +189,7 @@ generateProfiles = function(clusters){
 
 	# examine medoid spectral signatures
 	#medoids = clusters$medoids
-	medoids = clusters$final.clust$i.med
+	medoids = clusters$final.clust$id.med
 	k = length(unique(clusters$final.clust$clustering))
 	print(paste0("profiling: ", k))
 
@@ -202,7 +207,7 @@ generateProfiles = function(clusters){
 	medoidmelt[band=="rmse", band := tstrsplit(variable, "_")[3]]
 	medoidmelt[, metr := tstrsplit(variable, "_")[1]]
 	medoidmelt[metr=="robust",metr:="rmse"]
-	medoidmelt = medoidmelt[band %in% c("blue","green","red","nir","swir1","swir2","bt","ndvi","evi","tcb","tcg","tcw","tcwgd", "nbr", "nbrevi", "bcc","gcc","rcc") | metr %in% c("snowiness", "cloudiness", "seglength", "nbreaks","robust", "elv", "asp", "slp", "swocc", "swrec", "swsea", "swext")]
+	medoidmelt = medoidmelt[band %in% c("blue","green","red","nir","swir1","swir2","bt","ndvi","evi","tcb","tcg","tcw","tcwgd", "nbr", "nbrevi", "bcc","gcc","rcc") | metr %in% c("snowiness", "cloudiness", "seglength", "nbreaks","robust", "elv", "asp", "slp", "swocc", "swrec", "swsea", "swext", "PZI", "GSL")]
 	medoidmelt[is.na(band),band:=metr]
 	setkey(medoidmelt, band)
 	setkey(banddt, band)
@@ -232,7 +237,7 @@ generateProfiles = function(clusters){
 	for(i in kstart){
   	kend   = i + 4
 		if(kend > k)kend=k	
-		ggsave(plot=clustPlotter(i:kend, medoidmelt), paste0("../../plots/clusters_20180219/clusterProfiles_c",k,"_",i,"_",kend,"_k20sub.png"), 
+		ggsave(plot=clustPlotter(i:kend, medoidmelt), paste0("../../plots/clusters_20180319/clusterProfiles_c",k,"_",i,"_",kend,"_k50sub.png"), 
 					 width=8, height=6, units="in")
 	}
 }
@@ -244,7 +249,7 @@ generateProfiles = function(clusters){
 #generateProfiles(clusters_pam14)
 #generateProfiles(clusters_pam15)
 #generateProfiles(clusters_pam20) # generating weird error about being unable to cast empty dt? no mid/max or something?
-#generateProfiles(clusters_pam5)
+generateProfiles(clusters_pam50)
 #generateProfiles(clusters_clara28)
 
 generateHistograms = function(clusters, clustrange){
@@ -274,13 +279,19 @@ generateHistograms = function(clusters, clustrange){
 	k = clustrange[1] 
 		#length(unique(clusters$clustering))
 
-	ggsave(paste0("../../plots/clusters_20180219/clara20sub_",k,"_histos.png"), c_histos, height = 6, width = 8, units="in")
+	ggsave(paste0("../../plots/clusters_20180319/pam50_",k,"_histos.png"), c_histos, height = 6, width = 8, units="in")
 }
 
-generateHistograms(clusters_clara20sub,1:5)
-generateHistograms(clusters_clara20sub,6:10)
-generateHistograms(clusters_clara20sub,11:15)
-generateHistograms(clusters_clara20sub,16:20)
+generateHistograms(clusters_pam50,1:5)
+generateHistograms(clusters_pam50,6:10)
+generateHistograms(clusters_pam50,11:15)
+generateHistograms(clusters_pam50,16:20)
+generateHistograms(clusters_pam50,21:25)
+generateHistograms(clusters_pam50,26:30)
+generateHistograms(clusters_pam50,31:35)
+generateHistograms(clusters_pam50,36:40)
+generateHistograms(clusters_pam50,41:45)
+generateHistograms(clusters_pam50,46:50)
 
 
 ## plot confusion matrix

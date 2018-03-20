@@ -12,7 +12,7 @@ library(randomForest)
 library(data.table)
 library(foreach)
 library(doParallel)
-library(ranger)
+#library(ranger)
 #library(edarf)
 library(treeClust)
 library(raster)
@@ -24,7 +24,6 @@ print(Sys.time())
 # coefsdt = fread("../../data/features/featureSet_20171201_hasFilterAndEcozAndDEMAndSW.csv")
 # coefsdt = fread("../../data/features/featureSet_20180111_hasFilterAndEcozAndDEMAndSWAndChrom.csv")
 coefsdt = fread("../../data/features/featureSet_20180119_coreSample.csv")
-coefsnames = names(coefsdt)
 # labels
 labelfs = list.files("../../data/landcover_labels",
 										 full.names=T)
@@ -52,8 +51,6 @@ getPZI = function(i,dt){
 }
 
 #coefs_labels = coefsdt
-# i dont' know why the first one is NA row... drop it
-# coefs_labels = coefs_labels[-1,]
 coefs_labels = coefsdt[labelsdt, nomatch=0]
 
 # intersect year and segment range
@@ -137,15 +134,34 @@ coefs_labels[ecozone != "Taiga Shield", eco_TaigaShield := as.factor(0)]
 
 coefs_labels[,ecozone := NULL]
 
-featureNames = coefsnames[!grepl("rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|ecozone",coefsnames)]
-featureNames_coefs = coefsnames[grepl("robust",coefsnames)]
+
+allPZI = mclapply(1:nrow(coefs_labels),getPZI,dt=coefs_labels,mc.cores=detectCores())
+coefs_labels[,PZI:=unlist(allPZI)]
+coefs_labels[,GSL:=snowfall-snowmelt]
+
+## calculate mean values
+
+thebands = c("blue", "green", "red", "nir", "swir1", "swir2", "bt",
+             "bcc", "gcc", "rcc",
+             "ndvi", "evi", "nbr", "ndsi",
+             "tcg", "tcw", "tcb",
+             "tcwgd", "nbrevi")
+
+themons = c("m1", "m2", "m3", "m3", "m5", "m6", "m7")
+
+for(b in thebands){
+  mnvals = rowMeans(coefs_labels[,paste0(themons,"_",b),with=F])
+  coefs_labels[,paste0("mn_",b):=mnvals]
+}
+
+
+coefsnames = names(coefs_labels)
+featureNames = coefsnames[!grepl("rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|ecozone|surfaceType|vegForm|phenotype|density|under|wetlandFlag|landUse|confidence|skipped|overlap|postyear|year",coefsnames)]
 
 # tree clust is okay with missing values?
 #coefs_labels = na.omit(coefs_labels)
-
-allPZI = mclapply(1:nrow(coefs_labels),getPZI,dt=coefs_labels,mc.cores=detectCores())
-
-save(featureNames, file = "../../data/rf/featureNames")
+#save(featureNames, file = "../../data/rf/featureNames")
+save(featureNames, file = "../../data/rf/featureNames_20180319")
 
 coefs_labels = na.omit(coefs_labels)
 
@@ -153,13 +169,13 @@ coefs_labels = na.omit(coefs_labels)
 system.time(
 coefs_tc <- treeClust(coefs_labels[,featureNames,with=F], 
 										 d.num = 4,
-										 control = treeClust.control(parallelnodes = 28),
-										 final.algorithm = "clara",
-										 k = 28)
+										 control = treeClust.control(parallelnodes = detectCores()),
+										 final.algorithm = "pam",
+										 k = 50)
 )
 
 # sub indicates this is just for the labelled points (n = 6k)
-save(coefs_tc, file = "../../data/rf/clusters/tc_20180219_k30_d4")
+save(coefs_tc, file = "../../data/rf/clusters/tc_20180319_k50_d4")
 #save(coefs_tc, file = "../../data/rf/clusters/tc_20180219_k30")
 
 #
@@ -171,19 +187,18 @@ coefs_labels[,tc_pam30 := as.factor(tc_pam30)]
 clustsample = sample(1:nrow(coefs_labels), nrow(coefs_labels)/3)
 clusttest = coefs_labels[clustsample,]
 clusttrain= coefs_labels[!clustsample,]
+clusttrain = coefs_labels
 #
-clustrang13prob = ranger(tc_pam30~., data =clusttrain[,c("tc_pam30",featureNames),with=F], 
-										 importance="impurity",
-                     probability=T)
-clustrang13 = ranger(tc_pam30~., data =clusttrain[,c("tc_pam30",featureNames),with=F], 
-										 importance="impurity")
+clustrang13 = randomForest(tc_pam30~., data =clusttrain[,c("tc_pam30",featureNames),with=F], 
+										 importance=T)
 clust13_pred_r = predict(clustrang13, clusttest[,featureNames,with=F])
-clust13_pred_r_prob = predict(clustrang13prob, clusttest[,featureNames,with=F])
 conf_rang13 = confusionMatrix(clust13_pred_r$predictions, clusttest$tc_pam30)
 
-save(conf_rang13, file = "../../data/rf/clusters/tc_20180219_k30_conf")
-save(coefs_labels, file="../../data/rf/clusters/tc_20180219_k30_dt")
-save(clustrang13, file= "../../data/rf/model/tc_20180219_k30_rf")
+save(conf_rang13, file = "../../data/rf/clusters/tc_20180319_530_conf")
+save(coefs_labels, file="../../data/rf/clusters/tc_20180319_k50_dt")
+save(clusttest, file="../../data/rf/clusters/tc_20180319_k50_dt_test")
+save(clusttrain, file="../../data/rf/clusters/tc_20180319_k50_dt_train")
+save(clustrang13, file= "../../data/rf/model/tc_20180319_k50_pam_rf")
 
 # importance
 #imp = sort(importance(clustrang13),decreasing=T)
