@@ -1,3 +1,10 @@
+###############
+#
+#   To take cleaned predictions and build rasters
+#
+#
+
+
 library(raster)
 library(data.table)
 #library(feather)

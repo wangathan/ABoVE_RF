@@ -8,11 +8,9 @@
 module purge
 source ~/.bashrc
 
-
-
-Rscript buildMap_v3.R $1 $2
+Rscript buildMap_v2.R $1 $2
 
 # backup uses epochs
 # plain is annual but lacks gap filling
-# _v2 is annual and with gap filling but memory intensive
+# _v2 is annual and with gap filling but memory intensive. this works on geo! 
 # _v3 does gap filling and is annual, not memory intensive but depends on cleaned precitions

@@ -33,11 +33,11 @@ print(rfid)
 	loadersaver = function(fi, mapyear){
 
 		# get indt
-		
-		indt = get(load(fi))
 
 		fout = paste0("../../data/rf/predict_",rfid,"/clean_predict/",ti,"/",mapyear,"/",basename(fi),"_clean_",mapyear)
 		if(file.exists(fout))return(NULL)
+		
+		indt = get(load(fi))
 
     # make it to always pick the prediction index correctly based on the name
     splitting= strsplit(fi,"_")[[1]]
@@ -49,78 +49,83 @@ print(rfid)
 		# each feather covers two py and all px (0:5999)
 		# check that they all exist
 		lcdt = indt[yr_start <= mapyear & yr_end >= mapyear,]
+    lcdt = unique(lcdt)
 		rowpxpy = data.table(px = rep(0:5999,2), py = c(rep(realpy,6000),rep(realpy+1,6000))) 
 
 		# combine and see what's missing
 		setkey(rowpxpy, py, px)
 		setkey(lcdt, py, px)		
 
-		rowpxpy = merge(rowpxpy,lcdt,all=T)
+		rowpxpylc = merge(rowpxpy,lcdt,all=T)
 		#rm(lcdt)
 
 		# get missing rows and attempt to assign nearest-time-neighbor lc
-		napxpy = rowpxpy[is.na(lcmap),]
+		napxpy = rowpxpylc[is.na(lcmap),]
 		newlc <- sapply(1:nrow(napxpy), function(x)nafiller(napxpy[x,px],napxpy[x,py],mapyear,indt[px==napxpy[x,px] & py==napxpy[x,py],]))
 		napxpy[, lcmap := newlc]
 		#rm(newlc)
 		#rm(indt)
 
 		# so we don't hang on to the NA values
-		rowpxpy = na.omit(rowpxpy)
+		rowpxpylc = na.omit(rowpxpylc)
 		# get duplicated rows and attempt to prune to longest time segment lc
-		rowpxpy[, dupes := .N, by = c("px", "py")]	
+		rowpxpylc[, dupes := .N, by = c("px", "py")]	
 
 		# clean up dupes where break is on 2010 - pick the longest segment
-		rowpxpy[, seglength := yr_end - yr_start]
+		rowpxpylc[, seglength := yr_end - yr_start]
 
 		# for diagnosing Bh11v11 problems...
-		# rowpxpy_dup[pxpy == unique(rowpxpy_dup$pxpy)[sample(1:length(unique(rowpxpy_dup$pxpy)),1)],]
+		# rowpxpylc_dup[pxpy == unique(rowpxpylc_dup$pxpy)[sample(1:length(unique(rowpxpylc_dup$pxpy)),1)],]
 
-		rowpxpy_u = rowpxpy[dupes == 1,]
-		rowpxpy_dup = rowpxpy[dupes > 1,]
+		rowpxpylc_u = rowpxpylc[dupes == 1,]
+		rowpxpylc_dup = rowpxpylc[dupes > 1,]
 		
 
 		# if there are duplicates, pick the newest segment
-		if(nrow(rowpxpy_dup) > 0){
-			#rowpxpy_dup[,longerseg := (seglength == max(seglength)), by = c("px","py")]
+		if(nrow(rowpxpylc_dup) > 0){
+			#rowpxpylc_dup[,longerseg := (seglength == max(seglength)), by = c("px","py")]
 			# if both segments are the same length, pick the earlier one
-			rowpxpy_dup[,earlier := (yr_start == min(yr_start)), by = c("px", "py")]
-			rowpxpy_dedupe = rowpxpy_dup[earlier!=TRUE,]
-			#rowpxpy_dedupe = rowpxpy_dup[longerseg==TRUE,]
+			rowpxpylc_dup[,earlier := (yr_start <= min(yr_start)), by = c("px", "py")]
+			rowpxpylc_dedupe = rowpxpylc_dup[earlier!=TRUE,]
+
+      rowpxpylc_dedupe = rowpxpylc_dup[yr_start == mapyear,]
+			#rowpxpylc_dedupe = rowpxpylc_dup[longerseg==TRUE,]
 			
 			# another dupe check to break seglength ties
-			#rowpxpy_dedupe[,dupes := .N, by = c("px","py")]
+			#rowpxpylc_dedupe[,dupes := .N, by = c("px","py")]
 
-			#rowpxpy_dedupe_u = rowpxpy_dedupe[dupes==1,]
-			#rowpxpy_dedupe_dup = rowpxpy_dedupe[dupes>1,]
+			#rowpxpylc_dedupe_u = rowpxpylc_dedupe[dupes==1,]
+			#rowpxpylc_dedupe_dup = rowpxpylc_dedupe[dupes>1,]
 
-			#rowpxpy_dedupe_dedupe = rowpxpy_dedupe_dup[earlier==TRUE,]
+			#rowpxpylc_dedupe_dedupe = rowpxpylc_dedupe_dup[earlier==TRUE,]
 		
-			rowpxpy = rbindlist(list(rowpxpy_u[,.(py,px,lcmap)],
-                               rowpxpy_dedupe[,.(py,px,lcmap)],
-															 #rowpxpy_dedupe_u[,.(py,px,lcmap)], # seglenth used to break year ties
-															 #rowpxpy_dedupe_dedupe[,.(py,px,lcmap)], # seglength ties are broken
+			rowpxpylc = rbindlist(list(rowpxpylc_u[,.(py,px,lcmap)],
+                               rowpxpylc_dedupe[,.(py,px,lcmap)],
+															 #rowpxpylc_dedupe_u[,.(py,px,lcmap)], # seglenth used to break year ties
+															 #rowpxpylc_dedupe_dedupe[,.(py,px,lcmap)], # seglength ties are broken
 															 napxpy[,.(py,px,lcmap)]))
-			rm(rowpxpy_u)
-			#rm(rowpxpy_dedupe_u)
-			#rm(rowpxpy_dedupe_dedupe)
+			rm(rowpxpylc_u)
+			#rm(rowpxpylc_dedupe_u)
+			#rm(rowpxpylc_dedupe_dedupe)
 		}else{
-			rowpxpy = rbindlist(list(rowpxpy[,.(py,px,lcmap)],
+			rowpxpylc = rbindlist(list(rowpxpylc[,.(py,px,lcmap)],
 																napxpy[,.(py,px,lcmap)]))
 
 		}
 		rm(napxpy)
 
-		rowpxpy = unique(rowpxpy)
-		rowpxpy[,pxpy:=paste0(px,'-',py)]
-		rowpxpy = rowpxpy[!duplicated(rowpxpy$pxpy),] #a litte naive... need to thinko f a more intelligent solution to duplicates
+		rowpxpylc = unique(rowpxpylc)
+		rowpxpylc[,pxpy:=paste0(px,'-',py)]
+		rowpxpylc = rowpxpylc[!duplicated(rowpxpylc$pxpy),] #a litte naive... need to thinko f a more intelligent solution to duplicates
 		
-		if(nrow(rowpxpy) != 12000){
+		if(nrow(rowpxpylc) != 12000){
 			print(paste0("ERROR! File: ", fi, " resulted in not-12000 row file!"))
 		}
 		setkey(rowpxpy, py, px)
+    setkey(rowpxpylc,py,px)
+    row_out = merge(rowpxpy,rowpxpylc,all.x=T)
 
-		save(rowpxpy, file=fout)
+		save(row_out, file=fout)
 	}
 
 	nafiller = function(inpx,inpy,mapyear,pxlist) {
