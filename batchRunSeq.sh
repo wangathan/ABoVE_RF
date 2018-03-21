@@ -26,7 +26,7 @@ qsub runSeqPreBuiCleRem.sh Bh11v15 tc_20180319_k50_pam_rf
 qsub runSeqPreBuiCleRem.sh Bh13v03 tc_20180319_k50_pam_rf
 qsub runSeqPreBuiCleRem.sh Bh15v11 tc_20180319_k50_pam_rf
 qsub runSeqPreBuiCleRem.sh Bh13v11 tc_20180319_k50_pam_rf
-qsub runSeqPreBuiCleRem.sh Bh11v11 tc_20180319_k50_pam_rf
+#qsub runSeqPreBuiCleRem.sh Bh11v11 tc_20180319_k50_pam_rf
 qsub runSeqPreBuiCleRem.sh Bh14v12 tc_20180319_k50_pam_rf
 qsub runSeqPreBuiCleRem.sh Bh17v10 tc_20180319_k50_pam_rf
 qsub runSeqPreBuiCleRem.sh Bh13v07 tc_20180319_k50_pam_rf

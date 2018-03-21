@@ -73,12 +73,23 @@ loader = function(fi, mapyear){
 
   # if there are duplicates, pick the newest segment
   if(nrow(rowpxpylc_dup) > 0){
-    #rowpxpylc_dup[,longerseg := (seglength == max(seglength)), by = c("px","py")]
-    # if both segments are the same length, pick the earlier one
-    rowpxpylc_dup[,earlier := (yr_start <= min(yr_start)), by = c("px", "py")]
-    rowpxpylc_dedupe = rowpxpylc_dup[earlier!=TRUE,]
 
+    # pick the newest if the duplicate is from a break
     rowpxpylc_dedupe = rowpxpylc_dup[yr_start == mapyear,]
+    rowpxpylc_dedupe[,pxpy:=paste0(px,"-",py)]
+    rowpxpylc_dup[,pxpy:=paste0(px,"-",py)]
+
+    # if there's a dupe that's not related to contemporaneous break
+    # just pick the first one and hope for the best... maybe print a note
+    rowpxpylc_nonbreakdupe = rowpxpylc_dup[!pxpy %in% rowpxpylc_dedupe$pxpy,]
+    rowpxpylc_nonbreakdupe[,theFirst := .I, by = pxpy]
+    rowpxpylc_out = rbind(rowpxpylc_dedupe, rowpxpylc_nonbreakdupe[theFirst==1,names(rowpxpylc_dup),with=F])
+
+
+    if(nrow(rowpxpylc_nonbreakdupe) > 0 ){
+      print(paste0("File: ", fi, " has weird duplicates!"))
+    }
+
     #rowpxpylc_dedupe = rowpxpylc_dup[longerseg==TRUE,]
 
     # another dupe check to break seglength ties
@@ -90,7 +101,9 @@ loader = function(fi, mapyear){
     #rowpxpylc_dedupe_dedupe = rowpxpylc_dedupe_dup[earlier==TRUE,]
 
     rowpxpylc = rbindlist(list(rowpxpylc_u[,.(py,px,lcmap)],
-                               rowpxpylc_dedupe[,.(py,px,lcmap)],
+                               rowpxpylc_out[,.(py,px,lcmap)],
+#                               rowpxpylc_dedupe[,.(py,px,lcmap)],
+#                               rowpxpylc_nonbreakdupe[,.(py,px,lcmap)],
                                #rowpxpylc_dedupe_u[,.(py,px,lcmap)], # seglenth used to break year ties
                                #rowpxpylc_dedupe_dedupe[,.(py,px,lcmap)], # seglength ties are broken
                                napxpy[,.(py,px,lcmap)]))
@@ -102,7 +115,6 @@ loader = function(fi, mapyear){
                                napxpy[,.(py,px,lcmap)]))
 
   }
-  rm(napxpy)
 
   rowpxpylc = unique(rowpxpylc)
   rowpxpylc[,pxpy:=paste0(px,'-',py)]
