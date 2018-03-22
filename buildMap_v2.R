@@ -148,7 +148,10 @@ nafiller = function(inpx,inpy,mapyear,pxlist) {
   if(min(pxlist$yeardiff) > 5)return(NA)
 
   # pick the closest one and don't pick backwards
-  pxlist = pxlist[yr_start >= mapyear,]
+  if(nrow(pxlist[yr_start>=mapyear,]>0)){
+    pxlist = pxlist[yr_start >= mapyear,]
+  }
+
   closelc = pxlist[yeardiff == min(pxlist$yeardiff),lcmap]
   return(closelc[1])
 
