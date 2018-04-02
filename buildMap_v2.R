@@ -127,7 +127,15 @@ loader = function(fi, mapyear){
   setkey(rowpxpylc,py,px)
   row_out = merge(rowpxpy,rowpxpylc,all.x=T)
 
+  rm(rowpxpy)
+  rm(rowpxpylc)
+  rm(napxpy)
+  rm(rowpxpylc_u)
+  rm(rowpxpylc_dup)
+  gc()
+
   return(row_out)
+  #save(row_out, file=paste0('temp/',ti,'/',basename(fi)))
 }
 
 
@@ -148,7 +156,7 @@ nafiller = function(inpx,inpy,mapyear,pxlist) {
   if(min(pxlist$yeardiff) > 5)return(NA)
 
   # pick the closest one and don't pick backwards
-  if(nrow(pxlist[yr_start>=mapyear,]>0)){
+  if(nrow(pxlist[yr_start>=mapyear,])>0){
     pxlist = pxlist[yr_start >= mapyear,]
   }
 
@@ -173,6 +181,7 @@ for(mapyear in 1984:2014){
 		next
 	}
 	
+
 	# process files
 	system.time(
 		rfout <- mclapply(rffiles, loader, mapyear = mapyear, mc.cores=detectCores())

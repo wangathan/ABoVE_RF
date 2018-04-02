@@ -254,7 +254,7 @@ predictLCMAP = function(i, ti){
 }
 
 system.time(
-						test <- mclapply(1:length(ffiles), predictLCMAP, ti = ti,mc.cores=detectCores())
+						test <- mclapply(1:length(ffiles), predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 )
 
 predfail = which(unlist(lapply(test,class))=="try-error")
@@ -265,7 +265,7 @@ while(length(predfail) > 0){
 		break
 	}
 	system.time(
-							test<-mclapply(predfail,predictLCMAP,ti=ti,mc.cores=detectCores())
+							test<-mclapply(predfail,predictLCMAP,ti=ti,mc.cores=detectCores(),mc.preschedule=F)
 							)
 	predfail = which(unlist(lapply(test,class))=="try-error")
 	if(length(predfail)>0)counter=counter+1

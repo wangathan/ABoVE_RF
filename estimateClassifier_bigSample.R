@@ -12,7 +12,7 @@ library(randomForest)
 library(data.table)
 library(foreach)
 library(doParallel)
-#library(ranger)
+library(ranger)
 #library(edarf)
 library(treeClust)
 library(raster)
@@ -50,14 +50,28 @@ getPZI = function(i,dt){
   return(PZI)
 }
 
+getBioclim = function(i, dt, bcvar){
+  ti = dt[i, tile]
+  px = dt[i, px]
+  py = dt[i, py]
+  
+  bcfile = paste0("../../data/bioclim/tiles/",ti,"/",ti,"_",bcvar,".tif")
+  if(!file.exists(bcfile))
+    return(NA)
+  bcrast = raster(bcfile)
+  bcval = c(bcvar=bcrast[px+1, py+1])
+  return(bcval)
+}
+
 #coefs_labels = coefsdt
 coefs_labels = coefsdt[labelsdt, nomatch=0]
 
 # intersect year and segment range
-coefs_labels[, overlap := (year >= yr_start & year <= yr_end)]
-coefs_labels[, postyear := (year > 2014)]
+# coefs_labels[, overlap := (year >= yr_start & year <= yr_end)]
+# coefs_labels[, postyear := (year > 2014)]
+# coefs_labels = coefs_labels[(overlap | postyear) & skipped == 0 & surfaceType != 0,]
 
-coefs_labels = coefs_labels[(overlap | postyear) & skipped == 0 & surfaceType != 0,]
+## 20180327 trying big sample again?
 
 # get rid of soem garbage
 coefs_labels[, c("completed", "leafType", "whySkipped") := NULL]
@@ -136,7 +150,48 @@ coefs_labels[,ecozone := NULL]
 
 
 allPZI = mclapply(1:nrow(coefs_labels),getPZI,dt=coefs_labels,mc.cores=detectCores())
+allAMT = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annMeanTemp",dt=coefs_labels,mc.cores=detectCores())
+allMDR = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "meanDiurnalRange",dt=coefs_labels,mc.cores=detectCores())
+allISO = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "isothermality",dt=coefs_labels,mc.cores=detectCores())
+allTSeas = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "tempSeasonality",dt=coefs_labels,mc.cores=detectCores())
+allWrmMax = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestMax",dt=coefs_labels,mc.cores=detectCores())
+allCldMin = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestMin",dt=coefs_labels,mc.cores=detectCores())
+allAnnRng = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annualRange",dt=coefs_labels,mc.cores=detectCores())
+allWetTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettetTemp",dt=coefs_labels,mc.cores=detectCores())
+allDryTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestTemp",dt=coefs_labels,mc.cores=detectCores())
+allWrmTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestTemp",dt=coefs_labels,mc.cores=detectCores())
+allCldTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestTemp",dt=coefs_labels,mc.cores=detectCores())
+allAnnPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annPrecip",dt=coefs_labels,mc.cores=detectCores())
+allWetPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allDryPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allPcpSeas = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "precipSeasonality",dt=coefs_labels,mc.cores=detectCores())
+allWetPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allDryPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allWrmPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allCldPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestPrecip",dt=coefs_labels,mc.cores=detectCores())
+
 coefs_labels[,PZI:=unlist(allPZI)]
+
+coefs_labels[,annMeanTemp:=unlist(allAMT)]
+coefs_labels[,mnDiurnalRange:=unlist(allMDR)]
+coefs_labels[,isothermality:=unlist(allISO)]
+coefs_labels[,tempSeasonality:=unlist(allTSeas)]
+coefs_labels[,warmMax:=unlist(allWrmMax)]
+coefs_labels[,coldMin:=unlist(allCldMin)]
+coefs_labels[,annRange:=unlist(allAnnRng)]
+coefs_labels[,wetTemp:=unlist(allWetTemp)]
+coefs_labels[,dryTemp:=unlist(allDryTemp)]
+coefs_labels[,wrmTemp:=unlist(allWrmTemp)]
+coefs_labels[,cldTemp:=unlist(allCldTemp)]
+coefs_labels[,annPcp:=unlist(allAnnPcp)]
+coefs_labels[,wetPcp:=unlist(allWetPcp)]
+coefs_labels[,dryPcp:=unlist(allDryPcp)]
+coefs_labels[,pcpSeasonality:=unlist(allPcpSeas)]
+coefs_labels[,wetPcp:=unlist(allWetPcp)]
+coefs_labels[,dryPcp:=unlist(allDryPcp)]
+coefs_labels[,wrmPcp:=unlist(allWrmPcp)]
+coefs_labels[,cldPcp:=unlist(allCldPcp)]
+
 coefs_labels[,GSL:=snowfall-snowmelt]
 
 ## calculate mean values
@@ -161,11 +216,13 @@ featureNames = coefsnames[!grepl("rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a
 # tree clust is okay with missing values?
 #coefs_labels = na.omit(coefs_labels)
 #save(featureNames, file = "../../data/rf/featureNames")
-save(featureNames, file = "../../data/rf/featureNames_20180319")
+#save(featureNames, file = "../../data/rf/featureNames_20180319")
+save(featureNames, file = "../../data/rf/featureNames_20180327")
 
 coefs_labels = na.omit(coefs_labels)
 
-# d.num = 4 broke memory
+# d.num = 4 broke memory when big on discover
+# how about on geo?
 system.time(
 coefs_tc <- treeClust(coefs_labels[,featureNames,with=F], 
 										 d.num = 4,
@@ -175,7 +232,8 @@ coefs_tc <- treeClust(coefs_labels[,featureNames,with=F],
 )
 
 # sub indicates this is just for the labelled points (n = 6k)
-save(coefs_tc, file = "../../data/rf/clusters/tc_20180319_k50_d4")
+#save(coefs_tc, file = "../../data/rf/clusters/tc_20180319_k50_d4")
+save(coefs_tc, file = "../../data/rf/clusters/tc_20180327_k50_d4_big")
 #save(coefs_tc, file = "../../data/rf/clusters/tc_20180219_k30")
 
 #
