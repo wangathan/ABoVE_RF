@@ -56,4 +56,11 @@ finishedpred=preddt[completed==T, tilepreds]
 
 predToDo = finishedfeat[! finishedfeat %in% finishedpred]
 
-## 
+## write batch file
+
+# to predict
+batchPredictFile = data.table(tile = predToDo)
+
+batchPredictFile[, tile := paste0("qsub runPredict.sh ",tile," ",rfid)]
+batchPredictFile = rbind(data.table(tile = "#!/bin/bash"),batchPredictFile)
+write.table(batchPredictFile, "batchPredict_20180404.sh",row.names=F,col.names=F,quote=F)

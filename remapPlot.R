@@ -115,41 +115,43 @@ if(rfid == "tc_20180319_k50_pam_rf"){ # after a tour of street view #2
   #newrast = copy(lcmap)                                                    
   remapdt = data.table(lcmap = values(lcmap))                               
   remapdt[lcmap %in% c(32,48,20), newlc:= 1] #Everg F                           
-  remapdt[lcmap %in% c(10,17), newlc:= 2] #Decid F                           
-  remapdt[lcmap %in% c(25), newlc:= 3] #Mixed F                           
-  remapdt[lcmap %in% c(15,37,41,46), newlc:= 4] #Everg W                           
-  remapdt[lcmap %in% c(28), newlc:= 5] #Decid W                           
-  remapdt[lcmap %in% c(4), newlc:= 6] #Mixed W                           
-  remapdt[lcmap %in% c(24), newlc:= 7] #Bog Forest                          
+  remapdt[lcmap %in% c(10,17,25), newlc:= 2] #Decid F                           
+  #remapdt[lcmap %in% c(25), newlc:= 3] #Mixed F                           
+  remapdt[lcmap %in% c(15,37,41,46), newlc:= 3] #Everg W                           
+  remapdt[lcmap %in% c(28), newlc:= 4] #Decid W                           
+  #remapdt[lcmap %in% c(4), newlc:= 6] #Mixed W                           
+  remapdt[lcmap %in% c(24), newlc:= 5] #Bog Forest                          
   
-  remapdt[lcmap %in% c(12,14), newlc:= 8] #Low Shrub                          
-  remapdt[lcmap %in% c(13,18,42), newlc:= 9] #High Shrub                          
-  remapdt[lcmap %in% c(1,2,3,14,30,44,45,49), newlc:= 10] #Sparse Shrub                          
-  remapdt[lcmap %in% c(11,7,27), newlc:= 11] #Grass                           
-  remapdt[lcmap %in% c(26,29,21,34,38,47,50), newlc:= 12] #Sparse Grass/Lichen                
+  remapdt[lcmap %in% c(1,44,12,14), newlc:= 6] #Low Shrub                          
+  remapdt[lcmap %in% c(13,18,42,4), newlc:= 7] #High Shrub                          
+  remapdt[lcmap %in% c(3,14,30,45,49), newlc:= 8] #Sparse Shrub                          
+  remapdt[lcmap %in% c(11,7,27), newlc:= 9] #Grass                          
+  remapdt[lcmap %in% c(21), newlc:=10] #Tussock Tundra
+  remapdt[lcmap %in% c(29,2,34,38,47,50), newlc:= 11] #Sparse Grass/Lichen                
                                                                             
-  remapdt[lcmap %in% c(19,22), newlc:= 13] #Fen                            
-  remapdt[lcmap %in% c(9,43), newlc:= 14] #Bog                               
-  remapdt[lcmap %in% c(5), newlc:= 15] #Shallows                            
+  remapdt[lcmap %in% c(19,22), newlc:= 12] #Fen                            
+  remapdt[lcmap %in% c(9,43), newlc:= 13] #Bog                               
+  remapdt[lcmap %in% c(5), newlc:= 14] #Shallows                            
 
-  remapdt[lcmap %in% c(23,35,33,36,39,40), newlc:= 16] #Barren                        
-  remapdt[lcmap %in% c(6,8,16,31), newlc:= 17] #Water                             
+  remapdt[lcmap %in% c(26,23,35,33,36,39,40), newlc:= 15] #Barren                        
+  remapdt[lcmap %in% c(6,8,16,31), newlc:= 16] #Water                             
                                                                             
   lcmap[] = remapdt$newlc                                                   
 
   lcmap_col = c("#004400", #evergF
 							"#00CC00", #decidF
-							"#008800", #mixedF
+							#"#008800", #mixedF
 
               "#336633", #evergW
 							"#22BB22", #decidW
-							"#339933", #mixedW
+							#"#339933", #mixedW
 							"#799B2B", #bogW
 
 							"#845A06", #low shrub
 							"#AD3714", #high shrub
 							"#AFA377", #sparse shrub
 							"#EAC856", #grass
+							"#CE7D0C", #tussock
 							"#DFE5A2", #sparse veg low
 
 							"#4DC183", #Fen
@@ -161,17 +163,18 @@ if(rfid == "tc_20180319_k50_pam_rf"){ # after a tour of street view #2
 
 lcmap_leg = c("Everg F",
 							"Decid F",
-							"Mixed F",
+							#"Mixed F",
 
               "Everg W",
 							"Decid W",
-							"Mixed W",
+							#"Mixed W",
               "Bog-Forest",
 
 							"Low Shrub",
 							"Shrub",
 							"Sparse Shrub",
 							"Grass",
+							"Tussock Tundra",
 							"Sparse Grass", 
 
 							"Fen",
