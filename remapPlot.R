@@ -127,13 +127,13 @@ if(rfid == "tc_20180319_k50_pam_rf"){ # after a tour of street view #2
   remapdt[lcmap %in% c(3,14,30,45,49), newlc:= 8] #Sparse Shrub                          
   remapdt[lcmap %in% c(11,7,27), newlc:= 9] #Grass                          
   remapdt[lcmap %in% c(21), newlc:=10] #Tussock Tundra
-  remapdt[lcmap %in% c(29,2,34,38,47,50), newlc:= 11] #Sparse Grass/Lichen                
+  remapdt[lcmap %in% c(26,29,2,34,38,47,50), newlc:= 11] #Sparse Grass/Lichen                
                                                                             
   remapdt[lcmap %in% c(19,22), newlc:= 12] #Fen                            
   remapdt[lcmap %in% c(9,43), newlc:= 13] #Bog                               
   remapdt[lcmap %in% c(5), newlc:= 14] #Shallows                            
 
-  remapdt[lcmap %in% c(26,23,35,33,36,39,40), newlc:= 15] #Barren                        
+  remapdt[lcmap %in% c(23,35,33,36,39,40), newlc:= 15] #Barren                        
   remapdt[lcmap %in% c(6,8,16,31), newlc:= 16] #Water                             
                                                                             
   lcmap[] = remapdt$newlc                                                   
