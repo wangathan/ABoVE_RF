@@ -37,6 +37,25 @@ sw_rec = raster(paste0('../../data/Surface_water/recurrence_tiles/recurrence.',t
 # and Gruber's PZI data
 pzi = raster(paste0("../../data/PZI/tiles/",ti,"_PZI.tif"))
 
+# and bioclim data
+amt = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_annMeanTemp.tif"))
+mdr = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_meanDiurnalRange.tif"))
+iso = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_isothermality.tif"))
+TmpSea=raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_tempSeasonality.tif"))
+WrmMax= raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_warmestMax.tif"))
+CldMin= raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_coldestMin.tif"))
+AnnRng= raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_annualRange.tif"))
+WetTmp= raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_wettestTemp.tif"))
+DryTmp= raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_driestTemp.tif"))
+WrmTmp= raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_warmestTemp.tif"))
+CldTmp = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_coldestTemp.tif"))
+AnnPcp = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_annPrecip.tif"))
+PcpSea = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_precipSeasonality.tif"))
+WetPcp = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_wettestPrecip.tif"))
+DryPcp = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_driestPrecip.tif"))
+WrmPcp= raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_warmestPrecip.tif"))
+CldPcp = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_coldestPrecip.tif"))
+
 ## get files
 #if(thepoch == 2010){
 	ffiles = list.files(paste0("../../data/features/",ti),
@@ -211,21 +230,72 @@ predictLCMAP = function(i, ti){
 	sw_sea_i = getValues(sw_sea, row=rowi*2+1, nrows=2)
 	sw_ext_i = getValues(sw_ext, row=rowi*2+1, nrows=2)
 	pzi_i = getValues(pzi, row=rowi*2+1, nrows=2)
+  amt_i = getValues(amt, row=rowi*2+1, nrows=2)
+  mdr_i = getValues(mdr, row=rowi*2+1, nrows=2)
+  iso_i = getValues(iso, row=rowi*2+1, nrows=2)
+  TmpSea_i = getValues(TmpSea, row=rowi*2+1, nrows=2)
+  WrmMax_i = getValues(WrmMax, row=rowi*2+1, nrows=2)
+  CldMin_i = getValues(CldMin, row=rowi*2+1, nrows=2)
+  AnnRng_i = getValues(AnnRng, row=rowi*2+1, nrows=2)
+  WetTmp_i = getValues(WetTmp, row=rowi*2+1, nrows=2)
+  DryTmp_i = getValues(DryTmp, row=rowi*2+1, nrows=2)
+  WrmTmp_i = getValues(WrmTmp, row=rowi*2+1, nrows=2)
+  CldTmp_i = getValues(CldTmp, row=rowi*2+1, nrows=2)
+  AnnPcp_i = getValues(AnnPcp, row=rowi*2+1, nrows=2)
+  PcpSea_i = getValues(PcpSea, row=rowi*2+1, nrows=2)
+  WetPcp_i = getValues(WetPcp, row=rowi*2+1, nrows=2)
+  DryPcp_i = getValues(DryPcp, row=rowi*2+1, nrows=2)
+  WrmPcp_i = getValues(WrmPcp, row=rowi*2+1, nrows=2)
+  CldPcp_i = getValues(CldPcp, row=rowi*2+1, nrows=2)
 	dempx = c(0:5999, 0:5999) # it's all zero-indexed in yatsm
 	dempy = c(rep(rowi*2,6000), rep(rowi*2 + 1,6000))
-	demdt = data.table(px = dempx, 
-										 py = dempy, 
-										 asp = asp_i, 
-										 elv = elv_i, 
-										 slp = slp_i,
+  demdt = data.table(px = dempx, 
+                     py = dempy, 
+                     asp = asp_i, 
+                     elv = elv_i, 
+                     slp = slp_i,
                      PZI = pzi_i,
-										 swocc = sw_occ_i,
-										 swrec = sw_rec_i,
-										 swsea = sw_sea_i,
+                     annMeanTemp = amt_i,
+                     mnDiurnalRange = mdr_i,
+                     isothermality = iso_i,
+                     tempSeasonality = TmpSea_i, 
+                     warmMax = WrmMax_i, 
+                     coldMin = CldMin_i,
+                     annRange = AnnRng_i, 
+                     wetTemp = WetTmp_i, 
+                     dryTemp = DryTmp_i, 
+                     wrmTemp = WrmTmp_i, 
+                     cldTemp = CldTmp_i, 
+                     annPcp = AnnPcp_i, 
+                     pcpSeasonality = PcpSea_i, 
+                     wetPcp = WetPcp_i, 
+                     dryPcp = DryPcp_i, 
+                     wrmPcp = WrmPcp_i, 
+                     cldPcp =CldPcp_i, 
+                     swocc = sw_occ_i,
+                     swrec = sw_rec_i,
+                     swsea = sw_sea_i,
 										 swext = sw_ext_i)
 	demdt[is.na(asp), asp:=as.integer(median(demdt$asp, na.rm=T))]
 	demdt[is.na(elv), elv:=as.integer(median(demdt$elv, na.rm=T))]
 	demdt[is.na(slp), slp:=as.integer(median(demdt$slp, na.rm=T))]
+	demdt[is.na(PZI), PZI:=as.integer(median(demdt$PZI, na.rm=T))]
+	demdt[is.na(annMeanTemp), annMeanTemp:=as.integer(median(demdt$annMeanTemp, na.rm=T))]
+	demdt[is.na(mnDiurnalRange), mnDiurnalRange:=as.integer(median(demdt$mnDiurnalRange, na.rm=T))]
+	demdt[is.na(tempSeasonality), tempSeasonality:=as.integer(median(demdt$tempSeasonality, na.rm=T))]
+	demdt[is.na(warmMax), warmMax:=as.integer(median(demdt$warmMax, na.rm=T))]
+	demdt[is.na(coldMin), coldMin:=as.integer(median(demdt$coldMin, na.rm=T))]
+	demdt[is.na(annRange), annRange:=as.integer(median(demdt$annRange, na.rm=T))]
+	demdt[is.na(wetTemp), wetTemp:=as.integer(median(demdt$wetTemp, na.rm=T))]
+	demdt[is.na(dryTemp), dryTemp:=as.integer(median(demdt$dryTemp, na.rm=T))]
+	demdt[is.na(wrmTemp), wrmTemp:=as.integer(median(demdt$wrmTemp, na.rm=T))]
+	demdt[is.na(cldTemp), cldTemp:=as.integer(median(demdt$cldTemp, na.rm=T))]
+	demdt[is.na(annPcp), annPcp:=as.integer(median(demdt$annPcp, na.rm=T))]
+	demdt[is.na(pcpSeasonality), pcpSeasonality:=as.integer(median(demdt$pcpSeasonality, na.rm=T))]
+	demdt[is.na(wetPcp), wetPcp:=as.integer(median(demdt$wetPcp, na.rm=T))]
+	demdt[is.na(dryPcp), dryPcp:=as.integer(median(demdt$dryPcp, na.rm=T))]
+	demdt[is.na(wrmPcp), wrmPcp:=as.integer(median(demdt$wrmPcp, na.rm=T))]
+	demdt[is.na(cldPcp), cldPcp:=as.integer(median(demdt$cldPcp, na.rm=T))]
 	demdt[swocc==255, swocc:=0]
 	demdt[swrec==255, swrec:=0]
 	demdt[swext==255, swext:=0]

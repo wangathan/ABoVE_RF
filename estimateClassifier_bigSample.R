@@ -171,47 +171,43 @@ coefs_labels[ecozone != "Taiga Shield", eco_TaigaShield := as.factor(0)]
 coefs_labels[,ecozone := NULL]
 
 allPZI = mclapply(1:nrow(coefs_labels),getPZI,dt=coefs_labels,mc.cores=detectCores())
-#allAMT = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annMeanTemp",dt=coefs_labels,mc.cores=detectCores())
-#allMDR = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "meanDiurnalRange",dt=coefs_labels,mc.cores=detectCores())
-#allISO = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "isothermality",dt=coefs_labels,mc.cores=detectCores())
-#allTSeas = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "tempSeasonality",dt=coefs_labels,mc.cores=detectCores())
-#allWrmMax = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestMax",dt=coefs_labels,mc.cores=detectCores())
-#allCldMin = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestMin",dt=coefs_labels,mc.cores=detectCores())
-#allAnnRng = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annualRange",dt=coefs_labels,mc.cores=detectCores())
-#allWetTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettetTemp",dt=coefs_labels,mc.cores=detectCores())
-#allDryTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestTemp",dt=coefs_labels,mc.cores=detectCores())
-#allWrmTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestTemp",dt=coefs_labels,mc.cores=detectCores())
-#allCldTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestTemp",dt=coefs_labels,mc.cores=detectCores())
-#allAnnPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annPrecip",dt=coefs_labels,mc.cores=detectCores())
-#allWetPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettestPrecip",dt=coefs_labels,mc.cores=detectCores())
-#allDryPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestPrecip",dt=coefs_labels,mc.cores=detectCores())
-#allPcpSeas = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "precipSeasonality",dt=coefs_labels,mc.cores=detectCores())
-#allWetPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettestPrecip",dt=coefs_labels,mc.cores=detectCores())
-#allDryPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestPrecip",dt=coefs_labels,mc.cores=detectCores())
-#allWrmPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestPrecip",dt=coefs_labels,mc.cores=detectCores())
-#allCldPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allAMT <- mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annMeanTemp",dt=coefs_labels,mc.cores=detectCores())
+allMDR = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "meanDiurnalRange",dt=coefs_labels,mc.cores=detectCores())
+allISO = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "isothermality",dt=coefs_labels,mc.cores=detectCores())
+allTSeas = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "tempSeasonality",dt=coefs_labels,mc.cores=detectCores())
+allWrmMax = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestMax",dt=coefs_labels,mc.cores=detectCores())
+allCldMin = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestMin",dt=coefs_labels,mc.cores=detectCores())
+allAnnRng = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annualRange",dt=coefs_labels,mc.cores=detectCores())
+allWetTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettestTemp",dt=coefs_labels,mc.cores=detectCores())
+allDryTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestTemp",dt=coefs_labels,mc.cores=detectCores())
+allWrmTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestTemp",dt=coefs_labels,mc.cores=detectCores())
+allCldTemp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestTemp",dt=coefs_labels,mc.cores=detectCores())
+allAnnPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "annPrecip",dt=coefs_labels,mc.cores=detectCores())
+allPcpSeas = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "precipSeasonality",dt=coefs_labels,mc.cores=detectCores())
+allWetPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "wettestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allDryPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "driestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allWrmPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "warmestPrecip",dt=coefs_labels,mc.cores=detectCores())
+allCldPcp = mclapply(1:nrow(coefs_labels),getBioclim,bcvar = "coldestPrecip",dt=coefs_labels,mc.cores=detectCores())
 
 coefs_labels[,PZI:=unlist(allPZI)]
 
-#coefs_labels[,annMeanTemp:=unlist(allAMT)]
-#coefs_labels[,mnDiurnalRange:=unlist(allMDR)]
-#coefs_labels[,isothermality:=unlist(allISO)]
-#coefs_labels[,tempSeasonality:=unlist(allTSeas)]
-#coefs_labels[,warmMax:=unlist(allWrmMax)]
-#coefs_labels[,coldMin:=unlist(allCldMin)]
-#coefs_labels[,annRange:=unlist(allAnnRng)]
-#coefs_labels[,wetTemp:=unlist(allWetTemp)]
-#coefs_labels[,dryTemp:=unlist(allDryTemp)]
-#coefs_labels[,wrmTemp:=unlist(allWrmTemp)]
-#coefs_labels[,cldTemp:=unlist(allCldTemp)]
-#coefs_labels[,annPcp:=unlist(allAnnPcp)]
-#coefs_labels[,wetPcp:=unlist(allWetPcp)]
-#coefs_labels[,dryPcp:=unlist(allDryPcp)]
-#coefs_labels[,pcpSeasonality:=unlist(allPcpSeas)]
-#coefs_labels[,wetPcp:=unlist(allWetPcp)]
-#coefs_labels[,dryPcp:=unlist(allDryPcp)]
-#coefs_labels[,wrmPcp:=unlist(allWrmPcp)]
-#coefs_labels[,cldPcp:=unlist(allCldPcp)]
+coefs_labels[,annMeanTemp:=unlist(allAMT)]
+coefs_labels[,mnDiurnalRange:=unlist(allMDR)]
+coefs_labels[,isothermality:=unlist(allISO)]
+coefs_labels[,tempSeasonality:=unlist(allTSeas)]
+coefs_labels[,warmMax:=unlist(allWrmMax)]
+coefs_labels[,coldMin:=unlist(allCldMin)]
+coefs_labels[,annRange:=unlist(allAnnRng)]
+coefs_labels[,wetTemp:=unlist(allWetTemp)]
+coefs_labels[,dryTemp:=unlist(allDryTemp)]
+coefs_labels[,wrmTemp:=unlist(allWrmTemp)]
+coefs_labels[,cldTemp:=unlist(allCldTemp)]
+coefs_labels[,annPcp:=unlist(allAnnPcp)]
+coefs_labels[,pcpSeasonality:=unlist(allPcpSeas)]
+coefs_labels[,wetPcp:=unlist(allWetPcp)]
+coefs_labels[,dryPcp:=unlist(allDryPcp)]
+coefs_labels[,wrmPcp:=unlist(allWrmPcp)]
+coefs_labels[,cldPcp:=unlist(allCldPcp)]
 
 coefs_labels[,GSL:=snowfall-snowmelt]
 
@@ -232,7 +228,7 @@ for(b in thebands){
 
 
 coefsnames = names(coefs_labels)
-featureNames = coefsnames[!grepl("mergeid|unchanging|rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|ecozone|surfaceType|vegForm|phenotype|density|under|wetlandFlag|landUse|confidence|skipped|overlap|postyear|year",coefsnames)]
+featureNames = coefsnames[!grepl("wetTemp|mergeid|unchanging|rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|ecozone|surfaceType|vegForm|phenotype|density|under|wetlandFlag|landUse|confidence|skipped|overlap|postyear|year",coefsnames)]
 
 # tree clust is okay with missing values?
 #coefs_labels = na.omit(coefs_labels)
@@ -263,26 +259,63 @@ save(coefs_tc, file = "../../data/rf/clusters/tc_20180411_k50_d4_big")
 print("CLUSTERS SAVED")
 
 #
-coefs_labels[, tcCluster := coefs_tc$final.clust$tcClustering]
+coefs_labels[, tcCluster := coefs_tc$final.clust$clustering]
 coefs_labels[,tcCluster := as.factor(tcCluster)]
-#
-#coefs_labels = na.omit(coefs_labels)
+
+# deal with some NA
+coefs_labels[,PZI := ifelse(is.na(PZI),mean(PZI, na.rm=T), PZI),by=tile]
+ecoVars = featureNames[grep("eco_",featureNames)]
+coefs_labels[,(ecoVars) := lapply(.SD, function(x)ifelse(is.na(x),0,x)),.SDcols = ecoVars]
+
+# wetTemp is all NA, the rest need about 350 imputed...
+coefs_labels[,wetTemp:=NULL]
+# cycle through bioclim vars
+bcvars = c("annMeanTemp", "annPcp","mnDiurnalRange",
+           "warmMax", "wrmPcp", "wrmTemp",
+           "coldMin", "cldPcp", "cldTemp",
+           "wetPcp", "wetTmp","dryPcp", "dryTemp",
+           "pcpSeasonality", "tempSeasonality", "isothermality", "annRange",
+           "PZI")
+
+for(bc in bcvars){ # impute by tile (or by everything if nothing from tile)
+  print(bc)
+  coefs_labels[,(bc) := ifelse(is.na(get(bc)),median(get(bc),na.rm=T),get(bc)),by=tile]
+  coefs_labels[,(bc) := ifelse(is.na(get(bc)),median(get(bc),na.rm=T),get(bc))]
+}
+
+coefs_labels = coefs_labels[complete.cases(coefs_labels[,c("tcCluster",featureNames),with=F]),]
+
 ### do some train/test splitting for the random forests
-clustsample = sample(1:nrow(coefs_labels), nrow(coefs_labels)/3)
+clustsample = sample(1:nrow(coefs_labels), nrow(coefs_labels)/4)
 clusttest = coefs_labels[clustsample,]
 clusttrain= coefs_labels[!clustsample,]
-clusttrain = coefs_labels
+#clusttrain = coefs_labels
+
+
 #
 clustrang13 = randomForest(tcCluster~., data =clusttrain[,c("tcCluster",featureNames),with=F], 
-										 importance=T)
+										 importance=T,
+                     keep.forest=T)
 clust13_pred_r = predict(clustrang13, clusttest[,featureNames,with=F])
-conf_rang13 = confusionMatrix(clust13_pred_r$predictions, clusttest$tcCluster)
+clust13_prob_r = predict(clustrang13, clusttest[,featureNames,with=F],type="vote")
+conf_rang13 = confusionMatrix(clust13_pred_r, clusttest$tcCluster)
 
-save(conf_rang13, file = "../../data/rf/clusters/tc_20180411_530_conf")
+save(conf_rang13, file = "../../data/rf/clusters/tc_20180411_k50_conf")
 save(coefs_labels, file="../../data/rf/clusters/tc_20180411_k50_dt")
 save(clusttest, file="../../data/rf/clusters/tc_20180411_k50_dt_test")
 save(clusttrain, file="../../data/rf/clusters/tc_20180411_k50_dt_train")
 save(clustrang13, file= "../../data/rf/model/tc_20180411_k50_pam_rf")
+
+# pplot = partialPlot(x=clustrang13,pred.data=clusttrain[,c("tcCluster",featureNames),with=F])
+# this needs keep.forest=T (which I didn't do) and it's pretty slow, maybe play with it later
+
+varUsed(clustrang13)
+
+testcv = rfcv(clusttrain[,featureNames,with=F],
+              clusttrain[,tcCluster],
+              step = 0.8)
+
+save(testcv, "../../data/rf/clusters/tc_20180411_k50_testcv")
 
 # importance
 #imp = sort(importance(clustrang13),decreasing=T)
@@ -293,18 +326,18 @@ save(clustrang13, file= "../../data/rf/model/tc_20180411_k50_pam_rf")
 #ggplot(data = impdt[1:30,]) + geom_bar(aes(x = as.factor(vari), y = imp), stat="identity") 
 
 # try it with random forest
-system.time(
-  unrf <- randomForest(coefs_labels[,featureNames,with=F],
-                      proximity=T)
-)
-
-save(unrf, file="../../data/rf/clusters/unrf_20180219")
-
-# cluster
-system.time(
-  pam30 <- pam(1 - unrf$proximity, k=30, diss=T)
-)
-save(cluster_pam30, file = "../../data/rf/clusters/unrf_20180219_k30")
+#system.time(
+#  unrf <- randomForest(coefs_labels[,featureNames,with=F],
+#                      proximity=T)
+#)
+#
+#save(unrf, file="../../data/rf/clusters/unrf_20180219")
+#
+## cluster
+#system.time(
+#  pam30 <- pam(1 - unrf$proximity, k=30, diss=T)
+#)
+#save(cluster_pam30, file = "../../data/rf/clusters/unrf_20180219_k30")
 
 
 
