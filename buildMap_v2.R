@@ -174,7 +174,7 @@ for(mapyear in 1984:2014){
 	print("doing year: ")
 	print(mapyear)
 
-	dir.create(paste0("../../data/rf/rast/",rfid,"/",ti), showWarnings=F)
+	dir.create(paste0("../../data/rf/rast/",rfid,"/",ti), showWarnings=F,recursive=T)
 	fout = paste0("../../data/rf/rast/",rfid,"/",ti,"/",ti,"_",mapyear,"_",rfid,".tif")
 	if(file.exists(fout)){
 		print("This year already done!")

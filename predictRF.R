@@ -65,9 +65,10 @@ CldPcp = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_coldestPrecip.tif
 #											full.names=T)
 #}
 therf = get(load(paste0("../../data/rf/model/",rfid)))
-load("../../data/rf/featureNames_20180319")
+#load("../../data/rf/featureNames_20180319")
+load("../../data/rf/featureNames_20180411")
 ## also grab the training dataset
-LCMAPdt_train=get(load('../../data/rf/clusters/tc_20180319_k50_dt'))
+#LCMAPdt_train=get(load('../../data/rf/clusters/tc_20180319_k50_dt'))
 #LCMAPdt_train=get(load('../../data/rf/clusters/tc_20180219_k25_dt_mn_sub'))
 #load('../../data/rf/model/lcmapdt_train')
 
@@ -94,47 +95,47 @@ assignOneHotEcozone = function(coefs_labels){
 									"eco_IntermBor", "eco_AKRangeT", "eco_AleutMead", "eco_CoastalRF",
 								 "eco_ArcTundra", "eco_PacMtnTra", "eco_CoastMtnTra", "eco_BorCordill",
 								 "eco_PacMarit", "eco_TaigaCord", "eco_MontCord", "eco_TaigaPlain", "eco_SouthArctic",
-								 "eco_NorthArctic", "eco_Prairie", "eco_TaigaShield") := as.factor(1)]            
+								 "eco_NorthArctic", "eco_Prairie", "eco_TaigaShield") := as.numeric(1)]            
 	
-	coefs_labels[ecozone != "Boreal Shield", eco_BorealShield := as.factor(0)]            
+	coefs_labels[ecozone != "Boreal Shield", eco_BorealShield := as.numeric(0)]            
 
-	coefs_labels[ecozone != "Boreal PLain", eco_BorealPlain := as.factor(0)]              
+	coefs_labels[ecozone != "Boreal PLain", eco_BorealPlain := as.numeric(0)]              
 
-	coefs_labels[ecozone != "Bering Taiga", eco_BeringTaiga := as.factor(0)]              
+	coefs_labels[ecozone != "Bering Taiga", eco_BeringTaiga := as.numeric(0)]              
 
-	coefs_labels[ecozone != "Bering Tundra", eco_BeringTundra := as.factor(0)]            
+	coefs_labels[ecozone != "Bering Tundra", eco_BeringTundra := as.numeric(0)]            
 
-	coefs_labels[ecozone != "Intermontane Boreal", eco_IntermBor := as.factor(0)]         
+	coefs_labels[ecozone != "Intermontane Boreal", eco_IntermBor := as.numeric(0)]         
 
-	coefs_labels[ecozone != "Alaska Range Transition", eco_AKRangeT := as.factor(0)]      
+	coefs_labels[ecozone != "Alaska Range Transition", eco_AKRangeT := as.numeric(0)]      
 
-	coefs_labels[ecozone != "Aleutian Meadows", eco_AleutMead := as.factor(0)]            
+	coefs_labels[ecozone != "Aleutian Meadows", eco_AleutMead := as.numeric(0)]            
 
-	coefs_labels[ecozone != "Coastal Rainforests", eco_CoastalRF := as.factor(0)]         
+	coefs_labels[ecozone != "Coastal Rainforests", eco_CoastalRF := as.numeric(0)]         
 
-	coefs_labels[ecozone != "Arctic Tundra", eco_ArcTundra := as.factor(0)]               
+	coefs_labels[ecozone != "Arctic Tundra", eco_ArcTundra := as.numeric(0)]               
 
-	coefs_labels[ecozone != "Pacific Mountains Transition", eco_PacMtnTra := as.factor(0)]
+	coefs_labels[ecozone != "Pacific Mountains Transition", eco_PacMtnTra := as.numeric(0)]
 
-	coefs_labels[ecozone != "Coast Mountains Transition", eco_CoastMtnTra := as.factor(0)]
+	coefs_labels[ecozone != "Coast Mountains Transition", eco_CoastMtnTra := as.numeric(0)]
 
-	coefs_labels[ecozone != "Boreal Cordillera", eco_BorCordill := as.factor(0)]          
+	coefs_labels[ecozone != "Boreal Cordillera", eco_BorCordill := as.numeric(0)]          
 
-	coefs_labels[ecozone != "Pacific Maritime", eco_PacMarit := as.factor(0)]             
+	coefs_labels[ecozone != "Pacific Maritime", eco_PacMarit := as.numeric(0)]             
 
-	coefs_labels[ecozone != "Taiga Cordillera", eco_TaigaCord := as.factor(0)]            
+	coefs_labels[ecozone != "Taiga Cordillera", eco_TaigaCord := as.numeric(0)]            
 
-	coefs_labels[ecozone != "Montane Cordillera", eco_MontCord := as.factor(0)]           
+	coefs_labels[ecozone != "Montane Cordillera", eco_MontCord := as.numeric(0)]           
 
-	coefs_labels[ecozone != "Taiga Plain", eco_TaigaPlain := as.factor(0)]                
+	coefs_labels[ecozone != "Taiga Plain", eco_TaigaPlain := as.numeric(0)]                
 
-	coefs_labels[ecozone != "Southern Arctic", eco_SouthArctic := as.factor(0)]           
+	coefs_labels[ecozone != "Southern Arctic", eco_SouthArctic := as.numeric(0)]           
 
-	coefs_labels[ecozone != "Northern Arctic", eco_NorthArctic := as.factor(0)]
+	coefs_labels[ecozone != "Northern Arctic", eco_NorthArctic := as.numeric(0)]
 
-	coefs_labels[ecozone != "Prairie", eco_Prairie := as.factor(0)]
+	coefs_labels[ecozone != "Prairie", eco_Prairie := as.numeric(0)]
 
-	coefs_labels[ecozone != "Taiga Shield", eco_TaigaShield := as.factor(0)]
+	coefs_labels[ecozone != "Taiga Shield", eco_TaigaShield := as.numeric(0)]
 
 	coefs_labels[,ecozone := NULL]
 
@@ -168,7 +169,7 @@ predictLCMAP = function(i, ti){
 	# this is set up to rectify that. too bad ecozone doesn't matter much.
 	ecos = names(fdt)[grep("eco_",names(fdt))]
 	for(ezone in ecos){
-		setattr(fdt[[ezone]],"levels",c("1","0"))
+		setattr(fdt[[ezone]],"levels",c("2","1","0"))
 		#levels(fdt[[ezone]])=c("1","0")
 	}
 
@@ -324,6 +325,7 @@ predictLCMAP = function(i, ti){
 }
 
 system.time(
+						#test <- mclapply(1:50, predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 						test <- mclapply(1:length(ffiles), predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 )
 

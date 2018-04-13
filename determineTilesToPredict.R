@@ -10,7 +10,7 @@ library(data.table)
 library(parallel)
 
 rfid = commandArgs(TRUE)[1]
-rfid = "tc_20180319_k50_pam_rf"
+rfid = "tc_20180411_k50_pam_rf"
 
 checker=function(tile,type){
   if(type=="feats"){
@@ -61,6 +61,12 @@ predToDo = finishedfeat[! finishedfeat %in% finishedpred]
 # to predict
 batchPredictFile = data.table(tile = predToDo)
 
+batchPredictFile[, tile := paste0("qsub runSeqPreBuiCleRem.sh ",tile," ",rfid)]
+batchPredictFile = rbind(data.table(tile = "#!/bin/bash"),batchPredictFile)
+
+write.table(batchPredictFile, "batchSeq_20180413.sh", row.names=F, col.names=F, quote=F)
+
+batchPredictFile = data.table(tile = predToDo)
 batchPredictFile[, tile := paste0("qsub runPredict.sh ",tile," ",rfid)]
 batchPredictFile = rbind(data.table(tile = "#!/bin/bash"),batchPredictFile)
-write.table(batchPredictFile, "batchPredict_20180404.sh",row.names=F,col.names=F,quote=F)
+write.table(batchPredictFile, "batchPredict_20180413.sh",row.names=F,col.names=F,quote=F)

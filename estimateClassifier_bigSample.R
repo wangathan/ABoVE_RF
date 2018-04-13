@@ -228,7 +228,7 @@ for(b in thebands){
 
 
 coefsnames = names(coefs_labels)
-featureNames = coefsnames[!grepl("wetTemp|mergeid|unchanging|rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|ecozone|surfaceType|vegForm|phenotype|density|under|wetlandFlag|landUse|confidence|skipped|overlap|postyear|year",coefsnames)]
+featureNames = coefsnames[!grepl("mergeid|unchanging|rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|ecozone|surfaceType|vegForm|phenotype|density|under|wetlandFlag|landUse|confidence|skipped|overlap|postyear|year",coefsnames)]
 
 # tree clust is okay with missing values?
 #coefs_labels = na.omit(coefs_labels)
@@ -236,6 +236,26 @@ featureNames = coefsnames[!grepl("wetTemp|mergeid|unchanging|rowi|V1|px|py|start
 #save(featureNames, file = "../../data/rf/featureNames_20180319")
 #save(featureNames, file = "../../data/rf/featureNames_20180327")
 save(featureNames, file = "../../data/rf/featureNames_20180411")
+
+# deal with some NA
+
+coefs_labels[,PZI := ifelse(is.na(PZI),mean(PZI, na.rm=T), PZI),by=tile]
+ecoVars = featureNames[grep("eco_",featureNames)]
+coefs_labels[,(ecoVars) := lapply(.SD, function(x)ifelse(is.na(x),0,x)),.SDcols = ecoVars]
+
+# cycle through bioclim vars
+bcvars = c("annMeanTemp", "annPcp","mnDiurnalRange",
+           "warmMax", "wrmPcp", "wrmTemp",
+           "coldMin", "cldPcp", "cldTemp",
+           "wetPcp", "wetTemp","dryPcp", "dryTemp",
+           "pcpSeasonality", "tempSeasonality", "isothermality", "annRange",
+           "PZI")
+
+for(bc in bcvars){ # impute by tile (or by everything if nothing from tile)
+  print(bc)
+  coefs_labels[,(bc) := ifelse(is.na(get(bc)),median(get(bc),na.rm=T),get(bc)),by=tile]
+  coefs_labels[,(bc) := ifelse(is.na(get(bc)),median(get(bc),na.rm=T),get(bc))]
+}
 
 #coefs_labels = na.omit(coefs_labels)
 save(coefs_labels, file="../../data/rf/clusters/tc_20180411_dt")
@@ -262,37 +282,13 @@ print("CLUSTERS SAVED")
 coefs_labels[, tcCluster := coefs_tc$final.clust$clustering]
 coefs_labels[,tcCluster := as.factor(tcCluster)]
 
-# deal with some NA
-coefs_labels[,PZI := ifelse(is.na(PZI),mean(PZI, na.rm=T), PZI),by=tile]
-ecoVars = featureNames[grep("eco_",featureNames)]
-coefs_labels[,(ecoVars) := lapply(.SD, function(x)ifelse(is.na(x),0,x)),.SDcols = ecoVars]
-
-# wetTemp is all NA, the rest need about 350 imputed...
-coefs_labels[,wetTemp:=NULL]
-# cycle through bioclim vars
-bcvars = c("annMeanTemp", "annPcp","mnDiurnalRange",
-           "warmMax", "wrmPcp", "wrmTemp",
-           "coldMin", "cldPcp", "cldTemp",
-           "wetPcp", "wetTmp","dryPcp", "dryTemp",
-           "pcpSeasonality", "tempSeasonality", "isothermality", "annRange",
-           "PZI")
-
-for(bc in bcvars){ # impute by tile (or by everything if nothing from tile)
-  print(bc)
-  coefs_labels[,(bc) := ifelse(is.na(get(bc)),median(get(bc),na.rm=T),get(bc)),by=tile]
-  coefs_labels[,(bc) := ifelse(is.na(get(bc)),median(get(bc),na.rm=T),get(bc))]
-}
-
 coefs_labels = coefs_labels[complete.cases(coefs_labels[,c("tcCluster",featureNames),with=F]),]
 
 ### do some train/test splitting for the random forests
 clustsample = sample(1:nrow(coefs_labels), nrow(coefs_labels)/4)
 clusttest = coefs_labels[clustsample,]
 clusttrain= coefs_labels[!clustsample,]
-#clusttrain = coefs_labels
 
-
-#
 clustrang13 = randomForest(tcCluster~., data =clusttrain[,c("tcCluster",featureNames),with=F], 
 										 importance=T,
                      keep.forest=T)
@@ -306,16 +302,14 @@ save(clusttest, file="../../data/rf/clusters/tc_20180411_k50_dt_test")
 save(clusttrain, file="../../data/rf/clusters/tc_20180411_k50_dt_train")
 save(clustrang13, file= "../../data/rf/model/tc_20180411_k50_pam_rf")
 
-# pplot = partialPlot(x=clustrang13,pred.data=clusttrain[,c("tcCluster",featureNames),with=F])
-# this needs keep.forest=T (which I didn't do) and it's pretty slow, maybe play with it later
-
-varUsed(clustrang13)
-
 testcv = rfcv(clusttrain[,featureNames,with=F],
               clusttrain[,tcCluster],
               step = 0.8)
 
 save(testcv, "../../data/rf/clusters/tc_20180411_k50_testcv")
+
+pplot = partialPlot(x=clustrang13,pred.data=clusttrain[,c("tcCluster",featureNames),with=F])
+save(pplot, '../../data/rf/clusters/tc_20180411_k50_partialPlot')
 
 # importance
 #imp = sort(importance(clustrang13),decreasing=T)
