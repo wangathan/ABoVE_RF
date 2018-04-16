@@ -4,13 +4,20 @@
 #
 #
 #require(caret)
+library(cluster)
 #require(DMwR)
 library(randomForest)
 #library(unbalanced)
 library(data.table)
 library(foreach)
 library(doParallel)
+library(ggplot2)
 #library(ranger)
+
+rfid = commandArgs(TRUE)[1]
+
+## also do mean profiles?
+## time, cluster, band mabybe best as a shiny app
 
 assignLambda = function(x){
 	if(x=="blue")return(0.485)
@@ -89,15 +96,43 @@ clustPlotter = function(clustRange, medoidmelt){
 	return(clustprof)
 }
 
-# feature set
-# coefsdt = fread("../../data/features/featureSet_20171102_hasFilterAndDiffAndEcozNormMonth.csv")
-# coefsdt = fread("../../data/features/featureSet_20171102_hasFilterAndEcoz.csv")
-# coefsdt = fread("../../data/features/featureSet_20171201_hasFilterAndEcozAndDEMAndSW.csv")
-# coefsdt = fread("../../data/features/featureSet_20180111_hasFilterAndEcozAndDEMAndSWAndChrom.csv")
-# coefs_labels = get(load("../../data/rf/clusters/tc_20180219_k30_dt"))
-coefs_labels = get(load("../../data/rf/clusters/tc_20180319_k50_dt"))
-#coefs_labels = get(load("../../data/rf/clusters/tc_20180219_k20_dt_sub"))
+therf = get(load(paste0("../../data/rf/model/",rfid)))
+#load("../../data/rf/featureNames_20180411")
 
+if(rfid == "tc_20180319_k50_pam_rf"){
+
+load("../../data/rf/featureNames_20180319")
+coefs_labels=get(load('../../data/rf/clusters/tc_20180319_k50_dt'))
+clusters_pam = get(load("../../data/rf/clusters/tc_20180319_k50_d4"))
+}
+
+if(rfid == "tc_20180411_k50_pam_rf"){
+
+load("../../data/rf/featureNames_20180411")
+coefs_labels=get(load('../../data/rf/clusters/tc_20180411_k50_dt'))
+clusters_pam = get(load("../../data/rf/clusters/tc_20180411_k50_d4_big"))
+}
+
+if(rfid == "tc_20180415_noBC_k55_pam_rf"){
+
+load("../../data/rf/featureNames_20180415")
+coefs_labels=get(load('../../data/rf/clusters/tc_20180416_noBC_k55_dt'))
+clusters_pam = get(load("../../data/rf/clusters/tc_20180415_noBC_k55_d4_big"))
+}
+
+if(rfid == "tc_20180416_noGeo_k55_pam_rf"){
+
+load("../../data/rf/featureNames_20180415_nogeo")
+coefs_labels=get(load('../../data/rf/clusters/tc_20180416_k55_dt'))
+clusters_pam = get(load("../../data/rf/clusters/tc_20180416_noGeo_k55_d4_big"))
+}
+
+if(rfid == "tc_20180416_noGeoNoBC_k55_pam_rf"){
+
+load("../../data/rf/featureNames_20180415_noGeoNoBC")
+clusters_pam = get(load("../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_d4_big"))
+coefs_labels=get(load('../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_dt'))
+}
 # water
 coefs_labels[(surfaceType == 1) | 
 						 (density == 1 & under == 4),# | 
@@ -155,35 +190,6 @@ coefs_labels[(surfaceType == 3 & vegForm %in% c(3,4) & density %in% c(1,2,3) & w
 
 coefs_labels[, LCMAP := as.factor(LCMAP)]
 
-## testing training split
-
-
-
-library(cluster)
-#clusters_pam5 = get(load("../../data/rf/clusters_20171201/clusters_pam5"))
-#clusters_pam = get(load("../../data/rf/clusters_20171201/clusters_pam"))
-#clusters_pam11 = get(load("../../data/rf/clusters_20171201/clusters_pam11"))
-#clusters_pam12 = get(load("../../data/rf/clusters_20171201/clusters_pam12"))
-#clusters_pam13 = get(load("../../data/rf/clusters_20171201/clusters_pam13"))
-#clusters_pam14 = get(load("../../data/rf/clusters_20171201/clusters_pam14"))
-#clusters_pam15 = get(load("../../data/rf/clusters_20171201/clusters_pam15"))
-#clusters_pam20 = get(load("../../data/rf/clusters_20171201/clusters_pam20"))
-#A
-#clusters_clara28 = get(load("../../data/rf/clusters/tc_20180219_k30_d4"))
-#clusters_clara20sub = get(load("../../data/rf/clusters/tc_20180219_k20_d4_sub"))
-clusters_pam50 = get(load("../../data/rf/clusters/tc_20180319_k50_d4"))
-featureNames = names(coefs_labels)
-featureNames = featureNames[!grepl("pam35|LCMAP|rowi|surfaceType|vegForm|phenotype|under|density|wetlandFlag|landUse|year|confidence|skipped",featureNames)]
-
-#conf_pam20 = get(load("../../data/rf/clusters_20171201/conf_pam20"))
-#conf_pam5 = get(load("../../data/rf/clusters_20171201/conf_pam5"))
-#conf_pam11 = get(load("../../data/rf/clusters_20171201/conf_pam11"))
-#conf_pam12 = get(load("../../data/rf/clusters_20171201/conf_pam12"))
-#conf_pam13 = get(load("../../data/rf/clusters_20171201/conf_pam13"))
-#conf_pam14 = get(load("../../data/rf/clusters_20171201/conf_pam14"))
-#conf_pam15 = get(load("../../data/rf/clusters_20171201/conf_pam15"))
-#conf_pam10 = get(load("../../data/rf/clusters_20171201/conf_pam10"))
-
 
 generateProfiles = function(clusters){
 
@@ -237,96 +243,102 @@ generateProfiles = function(clusters){
 	for(i in kstart){
   	kend   = i + 4
 		if(kend > k)kend=k	
-		ggsave(plot=clustPlotter(i:kend, medoidmelt), paste0("../../plots/clusters_20180319/clusterProfiles_c",k,"_",i,"_",kend,"_k50sub.png"), 
+		ggsave(plot=clustPlotter(i:kend, medoidmelt), paste0("../../plots/clusters_",rfid,"/clusterProfiles_c",k,"_",i,"_",kend,".png"), 
 					 width=8, height=6, units="in")
 	}
 }
 
-#generateProfiles(clusters_pam)
-#generateProfiles(clusters_pam11)
-#generateProfiles(clusters_pam12)
-#generateProfiles(clusters_pam13)
-#generateProfiles(clusters_pam14)
-#generateProfiles(clusters_pam15)
-#generateProfiles(clusters_pam20) # generating weird error about being unable to cast empty dt? no mid/max or something?
-generateProfiles(clusters_pam50)
-#generateProfiles(clusters_clara28)
+dir.create(paste0("../../plots/clusters_",rfid))
+generateProfiles(clusters_pam)
 
 generateHistograms = function(clusters, clustrange){
 
 	# combine data
-	coefs_clusters = coefs_labels[, clust := clusters$final.clust$clustering]
-	clusterdt = coefs_clusters[, .(surfaceType, vegForm, phenotype, under, density, wetlandFlag, landUse,clust)] 
-	clusterdt = clusterdt[surfaceType != 0,]
+	#coefs_clusters = coefs_labels[, clust := clusters$final.clust$clustering]
+	clusterdt = coefs_labels[, .(surfaceType, vegForm, phenotype, under, density, wetlandFlag, landUse,tcCluster)] 
+#	clusterdt = clusterdt[surfaceType != 0,]
 #	clusterdt[density %in% c(0,3), dclass := "closed"]
 #	clusterdt[density %in% c(1), dclass := "sparse"]
 #	clusterdt[density %in% c(2), dclass := "open"]
 	clustermelt = melt(clusterdt,
-										 id.vars = c("clust", "density"))
+										 id.vars = c("tcCluster", "density"))
 										 #measure.vars = "dclass")
 
-	clustermelt = clustermelt[clust %in% clustrange,]
-	clustermelt = clustermelt[,count:=.N, by=c("variable","density","clust", "value")]
-	clustermelt = rbind(clustermelt, cbind(expand.grid(variable=unique(clustermelt$variable),density=unique(clustermelt$density),clust=unique(clustermelt$clust),value=unique(clustermelt$value)), count=0))
+	clustermelt = clustermelt[tcCluster %in% clustrange,]
+	clustermelt = clustermelt[,count:=.N, by=c("variable","density","tcCluster", "value")]
+	clustermelt = rbind(clustermelt, 
+                     cbind(expand.grid(variable=unique(clustermelt$variable),
+                                        density=unique(clustermelt$density),
+                                        tcCluster=unique(clustermelt$tcCluster),
+                                        value=unique(clustermelt$value)), 
+                            count=0)
+                     )
 	clustermelt = unique(clustermelt)
 
 	# plot
+	c_histos_naless = ggplot(data = na.omit(clustermelt), aes(x = as.factor(value), y = count, fill = as.factor(density))) + 
+		geom_bar(position="dodge", stat='identity') +
+		facet_grid(variable ~ tcCluster) + 
+		theme_bw() + 
+		theme(panel.grid.minor = element_blank())
 	c_histos = ggplot(data = clustermelt, aes(x = as.factor(value), y = count, fill = as.factor(density))) + 
 		geom_bar(position="dodge", stat='identity') +
-		facet_grid(variable ~ clust) + 
+		facet_grid(variable ~ tcCluster) + 
 		theme_bw() + 
 		theme(panel.grid.minor = element_blank())
 	k = clustrange[1] 
 		#length(unique(clusters$clustering))
 
-	ggsave(paste0("../../plots/clusters_20180319/pam50_",k,"_histos.png"), c_histos, height = 6, width = 8, units="in")
+	ggsave(paste0("../../plots/clusters_",rfid,"/k",k,"_histos_nas.png"), c_histos, height = 6, width = 8, units="in")
+	ggsave(paste0("../../plots/clusters_",rfid,"/k",k,"_histos.png"), c_histos_naless, height = 6, width = 8, units="in")
 }
 
-generateHistograms(clusters_pam50,1:5)
-generateHistograms(clusters_pam50,6:10)
-generateHistograms(clusters_pam50,11:15)
-generateHistograms(clusters_pam50,16:20)
-generateHistograms(clusters_pam50,21:25)
-generateHistograms(clusters_pam50,26:30)
-generateHistograms(clusters_pam50,31:35)
-generateHistograms(clusters_pam50,36:40)
-generateHistograms(clusters_pam50,41:45)
-generateHistograms(clusters_pam50,46:50)
+generateHistograms(clusters_pam,1:5)
+generateHistograms(clusters_pam,6:10)
+generateHistograms(clusters_pam,11:15)
+generateHistograms(clusters_pam,16:20)
+generateHistograms(clusters_pam,21:25)
+generateHistograms(clusters_pam,26:30)
+generateHistograms(clusters_pam,31:35)
+generateHistograms(clusters_pam,36:40)
+generateHistograms(clusters_pam,41:45)
+generateHistograms(clusters_pam,46:50)
+generateHistograms(clusters_pam,50:55)
 
 
-## plot confusion matrix
-conf = get(load("../../data/rf/clusters/tc_20180219_k20_conf"))
-
-table20 = conf$table
-
-referenceTotals = colSums(table20)
-
-table20prop = lapply(1:ncol(table20), function(x)table20[,x]/referenceTotals[x])
-table20prop = do.call(cbind,table20prop)
-colnames(table20prop) = rownames(table20prop)
-round(table20prop, 2)*100
-
-confdt = data.table(TClass = rep(1:20,20),
-										PClass = unlist(lapply(20:1,function(x)rep(x,20))),
-										Y = unlist(lapply(20:1,function(x)table20[,x])),
-										Yp = unlist(lapply(20:1,function(x)table20prop[,x])))
-
-confplot = ggplot(data =  confdt, mapping = aes(x = TClass, y = PClass)) +
-	geom_tile(aes(fill = Yp), colour = "white") +
-	geom_text(aes(label = sprintf("%1.0f", Y)), size = 1.5) +
-	scale_fill_gradient("Proportion",low = "#3333CC", high = "#CC3333", breaks=seq(from=0,to=1,by=0.1)) +
-	theme_bw() +
-	ylab("Predicted Class") + xlab("Reference Class") +
-	scale_x_continuous(breaks = 1:20) +
-	scale_y_continuous(trans="reverse", breaks = 1:20) +
-	theme(axis.text.x = element_text(angle = -35, vjust = 1, hjust = 0),
-				axis.text = element_text(size = 6)) +
-ggtitle("Confusion Matrix of Classifier")
-ggsave("../../plots/clusters_20180219/clara20_confusion.png",confplot, height=4, width=5, units='in')
-
-mapworld = borders("world", color="gray50", fill="gray50")
-mp = ggplot() + mapworld + geom_point(data=coefs_labels, aes(x = lon, y = lat), color='blue') + xlim(range(coefs_labels$lon, na.rm=T)) + ylim(range(coefs_labels$lat,na.rm=T))
-
-
-## think about importance
-
+### plot confusion matrix
+#conf = get(load("../../data/rf/clusters/tc_20180411_k50_conf"))
+#
+#table50 = conf$table
+#
+#referenceTotals = colSums(table20)
+#
+#table50prop = lapply(1:ncol(table50), function(x)table50[,x]/referenceTotals[x])
+#table50prop = do.call(cbind,table50prop)
+#colnames(table50prop) = rownames(table50prop)
+#round(table50prop, 2)*100
+#
+#confdt = data.table(TClass = rep(1:50,50),
+#										PClass = unlist(lapply(50:1,function(x)rep(x,50))),
+#										Y = unlist(lapply(50:1,function(x)table50[,x])),
+#										Yp = unlist(lapply(50:1,function(x)table50prop[,x])))
+#
+#confplot = ggplot(data =  confdt, mapping = aes(x = TClass, y = PClass)) +
+#	geom_tile(aes(fill = Yp), colour = "white") +
+#	geom_text(aes(label = sprintf("%1.0f", Y)), size = 1.5) +
+#	scale_fill_gradient("Proportion",low = "#3333CC", high = "#CC3333", breaks=seq(from=0,to=1,by=0.1)) +
+#	theme_bw() +
+#	ylab("Predicted Class") + xlab("Reference Class") +
+#	scale_x_continuous(breaks = 1:50) +
+#	scale_y_continuous(trans="reverse", breaks = 1:50) +
+#	theme(axis.text.x = element_text(angle = -35, vjust = 1, hjust = 0),
+#				axis.text = element_text(size = 6)) +
+#ggtitle("Confusion Matrix of Classifier")
+#ggsave("../../plots/clusters_20180219/clara20_confusion.png",confplot, height=4, width=5, units='in')
+#
+#mapworld = borders("world", color="gray50", fill="gray50")
+#mp = ggplot() + mapworld + geom_point(data=coefs_labels, aes(x = lon, y = lat), color='blue') + xlim(range(coefs_labels$lon, na.rm=T)) + ylim(range(coefs_labels$lat,na.rm=T))
+#
+#
+### think about importance
+#
