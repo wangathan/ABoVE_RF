@@ -39,7 +39,7 @@ sw_rec = raster(paste0('../../data/Surface_water/recurrence_tiles/recurrence.',t
 pzi = raster(paste0("../../data/PZI/tiles/",ti,"_PZI.tif"))
 
 # and bioclim data
-if(rfid %in% c("tc_20180411_k50_pam_rf", "tc_20180416_k55_noGeo_pam_rf")){
+if(rfid %in% c("tc_20180411_k50_pam_rf", "tc_20180416_noGeo_k55_pam_rf")){
   amt = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_annMeanTemp.tif"))
   mdr = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_meanDiurnalRange.tif"))
   iso = raster(paste0("../../data/bioclim/tiles/",ti,"/",ti,"_isothermality.tif"))
@@ -90,9 +90,14 @@ LCMAPdt_train=get(load('../../data/rf/clusters/tc_20180416_noBC_k55_dt'))
 if(rfid == "tc_20180416_noGeo_k55_pam_rf"){
 
 load("../../data/rf/featureNames_20180415_nogeo")
-LCMAPdt_train=get(load('../../data/rf/clusters/tc_20180416_k55_dt'))
+LCMAPdt_train=get(load('../../data/rf/clusters/tc_20180416_noGeo_k55_dt'))
 }
 
+if(rfid == "tc_20180416_ecozoneNoBC_k50_pam_rf"){
+
+load("../../data/rf/featureNames_20180416_ecozoneNoBC")
+LCMAPdt_train=get(load('../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_dt'))
+}
 if(rfid == "tc_20180416_noGeoNoBC_k55_pam_rf"){
 
 load("../../data/rf/featureNames_20180415_noGeoNoBC")
@@ -252,8 +257,6 @@ predictLCMAP = function(i, ti){
   fdt[is.na(snowmelt), snowmelt:=median(fdt$snowmelt,na.rm=T)]
   fdt[is.na(snowfall), snowfall:=median(fdt$snowfall,na.rm=T)]
 
-
-
   dempx = c(0:5999, 0:5999) # it's all zero-indexed in yatsm
   dempy = c(rep(rowi*2,6000), rep(rowi*2 + 1,6000))
 
@@ -267,7 +270,7 @@ predictLCMAP = function(i, ti){
   sw_ext_i = getValues(sw_ext, row=rowi*2+1, nrows=2)
   pzi_i = getValues(pzi, row=rowi*2+1, nrows=2)
 
-  if(rfid %in% c("tc_20180411_k50_pam_rf", "tc_20180416_k55_noGeo_pam_rf")){
+  if(rfid %in% c("tc_20180411_k50_pam_rf", "tc_20180416_noGeo_k55_pam_rf")){
     amt_i = getValues(amt, row=rowi*2+1, nrows=2)
     mdr_i = getValues(mdr, row=rowi*2+1, nrows=2)
     iso_i = getValues(iso, row=rowi*2+1, nrows=2)
@@ -334,6 +337,31 @@ predictLCMAP = function(i, ti){
     demdt[is.na(wrmPcp), wrmPcp:=as.integer(median(demdt$wrmPcp, na.rm=T))]
     demdt[is.na(cldPcp), cldPcp:=as.integer(median(demdt$cldPcp, na.rm=T))]
 
+    # impute bioclim vars. since each file is only 2 rows, best to impute from training data
+
+    bcvars = c("annMeanTemp", "annPcp","mnDiurnalRange",
+               "warmMax", "wrmPcp", "wrmTemp",
+               "coldMin", "cldPcp", "cldTemp",
+               "wetPcp", "wetTemp","dryPcp", "dryTemp",
+               "pcpSeasonality", "tempSeasonality", "isothermality", "annRange",
+               "PZI")
+
+
+   
+    # BIOCLIM uses a land/ocean mask which results in lots of missing data and long long buildtimes!
+    # impute with some geographic knowhow 
+    for(bc in bcvars){  #impute by tile (or by everything if nothing from tile)
+      if(any(is.na(demdt[,bc,with=F]))) { # only retrieve replacement if there's nothing available
+        mnlat = mean(fdt$lat,na.rm=T) # not being too picky for the whole row
+        mnlon = mean(fdt$lon,na.rm=T)
+
+        LCMAPdt_train[,distTile := sqrt((lat-mnlat)^2 + (lon-mnlon)^2)]
+        bcget = LCMAPdt_train[sort(LCMAPdt_train$distTile, decreasing=T), c("distTile",bcvars), with=F]
+        bcout = unlist(bcget[1, bc, with=F])
+        demdt[,(bc) := bcout]
+      }
+    }
+
   }else{
     demdt = data.table(px = dempx, 
                        py = dempy, 
@@ -379,7 +407,7 @@ predictLCMAP = function(i, ti){
 }
 
 system.time(
-	#					test <- mclapply(51:100, predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
+#						test <- mclapply(51:100, predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 						test <- mclapply(1:length(ffiles), predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 )
 
