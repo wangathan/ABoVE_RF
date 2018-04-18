@@ -111,6 +111,79 @@ lcmap_leg = c("Everg F",
 #
 #lcmap[] = remapdt$newlc
 #}
+if(rfid == "tc_20180416_noGeo_k55_pam_rf"){ # after a tour of street view #2
+  remapdt = data.table(lcmap = values(lcmap))                               
+  remapdt[lcmap %in% c(1,16,31), newlc:= 1] #Everg F                           
+  remapdt[lcmap %in% c(25,34), newlc:= 2] #Decid F                           
+  remapdt[lcmap %in% c(20,30), newlc:= 3] #Mixed F                           
+  remapdt[lcmap %in% c(15), newlc:= 3] #Everg W                           
+  remapdt[lcmap %in% c(22), newlc:= 4] #Decid W                           
+  remapdt[lcmap %in% c(44), newlc:= 6] #Mixed W                           
+  remapdt[lcmap %in% c(3,4,49), newlc:= 5] #Bog Forest                          
+  # 22, 4 appears in suburbs too
+  
+  remapdt[lcmap %in% c(27,39,53), newlc:= 6] #Low Shrub                          
+  remapdt[lcmap %in% c(19,23,50), newlc:= 7] #High Shrub                          
+  remapdt[lcmap %in% c(7,18,21,40,41,51,54), newlc:= 8] #Sparse Shrub                          
+  remapdt[lcmap %in% c(14), newlc:= 9] #Grass                          
+  remapdt[lcmap %in% c(42), newlc:=10] #Tussock Tundra
+  remapdt[lcmap %in% c(8,26,28,36,37,48), newlc:= 11] #Sparse Grass/Lichen                
+                                                                            
+  remapdt[lcmap %in% c(2,10,11,35,46), newlc:= 12] #Fen                            
+  remapdt[lcmap %in% c(32,52), newlc:= 13] #Bog                               
+  remapdt[lcmap %in% c(12), newlc:= 14] #Shallows                            
+
+  remapdt[lcmap %in% c(9,13,17,29,43,45,55), newlc:= 15] #Barren                        
+  remapdt[lcmap %in% c(5,6,24,33,38,47), newlc:= 16] #Water                             
+                                                                            
+  lcmap[] = remapdt$newlc                                                   
+
+  lcmap_col = c("#004400", #evergF
+							"#00CC00", #decidF
+							"#008800", #mixedF
+
+              "#336633", #evergW
+							"#22BB22", #decidW
+							"#339933", #mixedW
+							"#799B2B", #bogW
+
+							"#845A06", #low shrub
+							"#AD3714", #high shrub
+							"#AFA377", #sparse shrub
+							"#EAC856", #grass
+							"#CE7D0C", #tussock
+							"#DFE5A2", #sparse veg low
+
+							"#4DC183", #Fen
+							"#F7A765", #Bog
+							"#75ACFF", #Shallows
+
+							"#888888", #barren
+							"#3333FF") #water
+
+lcmap_leg = c("Everg F",
+							"Decid F",
+							"Mixed F",
+
+              "Everg W",
+							"Decid W",
+							"Mixed W",
+              "Bog-Forest",
+
+							"Low Shrub",
+							"Shrub",
+							"Sparse Shrub",
+							"Grass",
+							"Tussock Tundra",
+							"Sparse Grass", 
+
+							"Fen",
+							"Bog",
+              "Shallows",
+
+              "Barren",
+              "Water")
+}                                                                         
 if(rfid == "tc_20180319_k50_pam_rf"){ # after a tour of street view #2
   #newrast = copy(lcmap)                                                    
   remapdt = data.table(lcmap = values(lcmap))                               
