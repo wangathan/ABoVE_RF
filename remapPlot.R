@@ -113,28 +113,28 @@ lcmap_leg = c("Everg F",
 #}
 if(rfid == "tc_20180416_noGeo_k55_pam_rf"){ # after a tour of street view #2
   remapdt = data.table(lcmap = values(lcmap))                               
-  remapdt[lcmap %in% c(1,16,31), newlc:= 1] #Everg F                           
+  remapdt[lcmap %in% c(1,15,16,31), newlc:= 1] #Everg F                           
   remapdt[lcmap %in% c(25,34), newlc:= 2] #Decid F                           
   remapdt[lcmap %in% c(20,30), newlc:= 3] #Mixed F                           
-  remapdt[lcmap %in% c(15), newlc:= 4] #Everg W                           
-  remapdt[lcmap %in% c(22), newlc:= 5] #Decid W                           
-  remapdt[lcmap %in% c(44), newlc:= 6] #Mixed W                           
-  remapdt[lcmap %in% c(3,4,49), newlc:= 7] #Bog Forest                          
+  #remapdt[lcmap %in% c(15), newlc:= 4] #Everg W                           
+  #remapdt[lcmap %in% c(22), newlc:= 5] #Decid W                           
+  #remapdt[lcmap %in% c(44), newlc:= 6] #Mixed W                          # definitely woodland. just "woodland"? 
+  remapdt[lcmap %in% c(3,4,44, 49), newlc:= 4] #Bog Forest                          
   # 22, 4 appears in suburbs too
   
-  remapdt[lcmap %in% c(27,39,53), newlc:= 8] #Low Shrub                          
-  remapdt[lcmap %in% c(19,23,50), newlc:= 9] #High Shrub                          
-  remapdt[lcmap %in% c(7,18,21,40,41,51,54), newlc:= 10] #Sparse Shrub                          
-  remapdt[lcmap %in% c(14), newlc:= 11] #Grass                          
-  remapdt[lcmap %in% c(42), newlc:=12] #Tussock Tundra
-  remapdt[lcmap %in% c(8,26,28,36,37,48), newlc:= 13] #Sparse Grass/Lichen                
+  remapdt[lcmap %in% c(27,39,53), newlc:= 5] #Low Shrub                          
+  remapdt[lcmap %in% c(19,23,50), newlc:= 6] #High Shrub                          
+  remapdt[lcmap %in% c(7,18,21,22,40,41,51,54), newlc:= 7] #Sparse Shrub                          
+  remapdt[lcmap %in% c(14), newlc:= 8] #Grass                          
+  remapdt[lcmap %in% c(42), newlc:=9] #Tussock Tundra
+  remapdt[lcmap %in% c(8,26,28,36,37,48), newlc:= 10] #Sparse Grass/Lichen                
                                                                             
-  remapdt[lcmap %in% c(2,10,11,35,46), newlc:= 14] #Fen                            
-  remapdt[lcmap %in% c(32,52), newlc:= 15] #Bog                               
-  remapdt[lcmap %in% c(12), newlc:= 16] #Shallows                            
+  remapdt[lcmap %in% c(2,10,11,35,46), newlc:= 11] #Fen                            
+  remapdt[lcmap %in% c(32,52), newlc:= 12] #Bog                               
+  remapdt[lcmap %in% c(12), newlc:= 13] #Shallows                            
 
-  remapdt[lcmap %in% c(9,13,17,29,43,45,55), newlc:= 17] #Barren                        
-  remapdt[lcmap %in% c(5,6,24,33,38,47), newlc:= 18] #Water                             
+  remapdt[lcmap %in% c(9,13,17,29,43,45,55), newlc:= 14] #Barren                        
+  remapdt[lcmap %in% c(5,6,24,33,38,47), newlc:= 15] #Water                             
                                                                             
   lcmap[] = remapdt$newlc                                                   
 
@@ -142,16 +142,16 @@ if(rfid == "tc_20180416_noGeo_k55_pam_rf"){ # after a tour of street view #2
 							"#00DD00", #decidF
 							"#008800", #mixedF
 
-              "#336633", #evergW
-							"#66DD66", #decidW
-							"#559955", #mixedW
-							"#79843B", #bogW
+              #"#336633", #evergW
+							#"#66DD66", #decidW
+							#"#559955", #mixedW
+							"#8AC181", #bogW
 
 							"#845A06", #low shrub
 							"#AD3714", #high shrub
 							"#AFA377", #sparse shrub
 							"#EAC856", #grass
-							"#7F6E18", #tussock
+							"#BAA22A", #tussock
 							"#DFE5A2", #sparse veg low
 
 							"#4DC183", #Fen
@@ -165,17 +165,17 @@ lcmap_leg = c("Everg F",
 							"Decid F",
 							"Mixed F",
 
-              "Everg W",
-							"Decid W",
-							"Mixed W",
-              "Bog-Forest",
+              #"Everg W",
+							#"Decid W",
+							#"Mixed W",
+              "Woodland",
 
 							"Low Shrub",
-							"Shrub",
-							"Sparse Shrub",
-							"Grass",
+							"Shrubland",
+							"Open Shrubland",
+							"Herbaceous",
 							"Tussock Tundra",
-							"Sparse Grass", 
+							"Sparsely Vegetated", 
 
 							"Fen",
 							"Bog",
