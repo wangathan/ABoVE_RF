@@ -25,9 +25,21 @@ print(paste0("predicting for tile: ", ti))
 print(paste0("using: ", rfid))
 
 # now we include the DEM data
-elev = raster(paste0('../../data/aster/',ti,'/AST_DEM_',ti,'_elv.tif'))
-asp = raster(paste0('../../data/aster/',ti,'/AST_DEM_',ti,'_asp.tif'))
-slp = raster(paste0('../../data/aster/',ti,'/AST_DEM_',ti,'_slp.tif'))
+#elev = raster(paste0('../../data/aster/',ti,'/AST_DEM_',ti,'_elv.tif'))
+#asp = raster(paste0('../../data/aster/',ti,'/AST_DEM_',ti,'_asp.tif'))
+#slp = raster(paste0('../../data/aster/',ti,'/AST_DEM_',ti,'_slp.tif'))
+
+elev = raster(paste0("/projectnb/modislc/projects/above/tiles/AST_DEM/AST_DEM.",ti,".tif"))
+elev[elev %in% c(-32768,32768)] = NA
+asp = terrain(elev, opt = "aspect", unit="degrees")
+slp = terrain(elev, opt = "slope", unit="degrees")
+
+if(sum(is.na(values(slp))) == ncell(slp) | 
+   sum(is.na(values(elev))) == ncell(elev) | 
+   sum(is.na(values(asp))) == ncell(asp)){
+  print("ASTER DATA ERROR")
+  stop
+}
 
 # and Belward's surface water data
 sw_occ = raster(paste0('../../data/Surface_water/occurrence_tiles/occurrence.',ti,'.tif'))
@@ -179,7 +191,6 @@ predictLCMAP = function(i, ti){
   # read and clean up
 
   if(i %% 100 == 0)print(i)
-
 
   rowi = as.numeric(strsplit(ffiles[i],"_c|_f")[[1]][2])
   ## save outputs
@@ -407,7 +418,7 @@ predictLCMAP = function(i, ti){
 }
 
 system.time(
-#						test <- mclapply(51:100, predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
+#						test <- mclapply(1:100, predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 						test <- mclapply(1:length(ffiles), predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 )
 
