@@ -171,15 +171,20 @@ for(mapyear in 1984:2014){
 											 full.names=T)#,
 											 #pattern="shade")
 
+  if(length(rffiles) < 3000){
+    print("hey we're missing prediction files here!!")
+#    stop
+  }
+
 	print("doing year: ")
 	print(mapyear)
 
 	dir.create(paste0("../../data/rf/rast/",rfid,"/",ti), showWarnings=F,recursive=T)
 	fout = paste0("../../data/rf/rast/",rfid,"/",ti,"/",ti,"_",mapyear,"_",rfid,".tif")
-	if(file.exists(fout)){
-		print("This year already done!")
-		next
-	}
+	#if(file.exists(fout)){
+	#	print("This year already done!")
+	#	next
+	#}
 	
 
 	# process files
@@ -192,6 +197,26 @@ for(mapyear in 1984:2014){
 	# make a fake raster to extract from
 	LCrast = raster(paste0("../../data/aster/",ti,"/AST_DEM_",ti,"_slp.tif"))
 	#LCrast[] = as.numeric(as.character(mapPxPy$lcmap))
+  
+
+  if(ti %in% c("Bh06v00", "Bh07v00")){
+
+   # merge by pxpy...
+    expxpy = as.data.table(expand.grid(0:5999,0:5999))
+    setnames(expxpy, c("py","px"))
+
+#   setkey(rfdt, py, px)
+   setkey(expxpy, py, px)
+
+   rfdt2 = merge(expxpy, rfdt, all.x=T)  
+  rfdt = rfdt2
+
+  }
+  if(nrow(rfdt) < 6000*6000){
+    print("bad map!!")
+  }
+
+
 	LCrast[] = rfdt$lcmap
 
 	writeRaster(LCrast, fout, overwrite=T)
