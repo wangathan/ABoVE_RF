@@ -123,7 +123,7 @@ clusters_pam = get(load("../../data/rf/clusters/tc_20180415_noBC_k55_d4_big"))
 if(rfid == "tc_20180416_noGeo_k55_pam_rf"){
 
 load("../../data/rf/featureNames_20180415_nogeo")
-coefs_labels=get(load('../../data/rf/clusters/tc_20180416_k55_dt'))
+coefs_labels=get(load('../../data/rf/clusters/tc_20180416_noGeo_k55_dt'))
 clusters_pam = get(load("../../data/rf/clusters/tc_20180416_noGeo_k55_d4_big"))
 }
 
@@ -133,123 +133,129 @@ load("../../data/rf/featureNames_20180415_noGeoNoBC")
 clusters_pam = get(load("../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_d4_big"))
 coefs_labels=get(load('../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_dt'))
 }
-# water
-coefs_labels[(surfaceType == 1) | 
-						 (density == 1 & under == 4),# | 
-#						 (wetlandFlag == 3),
-   	  			 LCMAP := "Water"]
-#coefs_labels[(surfaceType == 2 & landUse == 1),
-#						 LCMAP := "Developed"]
-coefs_labels[(landUse == 2 | landUse == 3), 
-						 LCMAP := "Cropland"]
-coefs_labels[(surfaceType == 2 & landUse != 1) |
-						 (surfaceType == 3 & density %in% c(1) & under == 1),
-					   LCMAP := "Barren"]
-coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype %in% c(1) & density %in% c(2,3)) & wetlandFlag == 1,
-						 LCMAP := "Decid Forest"]
-coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype %in% c(3) & density %in% c(2,3)) & wetlandFlag == 1,
-						 LCMAP := "Mixed Forest"]
-coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype == 2 & density %in% c(3)) & wetlandFlag == 1,
-						 LCMAP := "Everg Forest"]
-coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype == 2 & density %in% c(2,1)) & wetlandFlag == 1 & under == 1,
-						 LCMAP := "Peat Woodland"]
-coefs_labels[(surfaceType == 3 & vegForm %in% c(2,3) & landUse == 5),
-						 LCMAP := "Post-fire"]
-coefs_labels[(surfaceType == 3 & vegForm == 4 & landUse == 5),
-						 LCMAP := "Secondary Forest"]
-# coefs_labels[(surfaceType == 4 & vegForm == 3 & phenotype == 2 & density == 1 & wetlandFlag == 1),
-# 							LCMAP := "Sparse Dry Forest"]
+if(rfid == "tc_20180416_ecozoneNoBC_k50_pam_rf"){
 
-coefs_labels[(surfaceType == 3 & vegForm %in% c(3) & under %in% c(2,3) & density %in% c(2,1) & wetlandFlag == 1),
-						 LCMAP := "Open Shrubs"]
-coefs_labels[(surfaceType == 3 & vegForm %in% c(1,2) & density %in% c(1,2) & under == 1),
-						 LCMAP := "Sparsely Vegetated"]
-coefs_labels[(surfaceType == 3 & vegForm %in% c(2,3) & landUse == 5),
-						 LCMAP := "Post-fire"]
-# coefs_labels[(surfaceType == 4 & vegForm == 3 & phenotype == 2 & density == 1 & wetlandFlag == 2),
-# 							LCMAP := "Sparse Wetland Forest"]
-
-coefs_labels[(surfaceType == 3 & vegForm %in% c(2) & density %in% c(2,3) & wetlandFlag == 1), 
-						 LCMAP := "Grass"]
-coefs_labels[(surfaceType == 3 & vegForm %in% c(3) & density %in% c(2,3) & wetlandFlag == 1),
-						 LCMAP := "Shrub"]
-coefs_labels[(wetlandFlag == 3),
-						 LCMAP := "Shallow Lake"]
-coefs_labels[(surfaceType == 3 & vegForm %in% c(1) & density %in% c(1,2,3) & wetlandFlag == 2),
-						 LCMAP := "Bog"]
-coefs_labels[(surfaceType == 3 & vegForm %in% c(2) & density %in% c(1,2,3) & wetlandFlag == 2),
-						 LCMAP := "Fen"]
-coefs_labels[(surfaceType == 3 & vegForm %in% c(3,4) & density %in% c(1,2,3) & wetlandFlag == 2),
-						 LCMAP := "Woody Wetland"]
-#coefs_labels[(surfaceType == 3 & vegForm %in% c(1,2,3,4) & density %in% c(1,2,3) & wetlandFlag == 2),
-#						 LCMAP := "Wetland"]
-#coefs_labels[(surfaceType == 4 | snowiness > 0.7),
-#						 LCMAP := "Snow/ice"]
-#coefs_labels[landUse == 5,
-#						 LCMAP := "Disturbed/transitional"]
-
-coefs_labels[, LCMAP := as.factor(LCMAP)]
-
-
-generateProfiles = function(clusters){
-
-	# examine medoid spectral signatures
-	#medoids = clusters$medoids
-	medoids = clusters$final.clust$id.med
-	k = length(unique(clusters$final.clust$clustering))
-	print(paste0("profiling: ", k))
-
-	medoiddt_l = lapply(as.numeric(medoids), function(x)return(coefs_labels[x,]))
-	medoiddt = rbindlist(medoiddt_l)
-	medoiddt[,med:=medoids]
-	medoiddt[,clust:=1:length(unique(clusters$final.clust$clustering))]
-
-	medoidmelt = melt(medoiddt,
-										id.vars=c('LCMAP','clust'),
-										measure.vars = c(featureNames[!grepl("ecozone",featureNames)]))
-
-	# get some feature info and normalize them
-	medoidmelt[, band := tstrsplit(variable, "_")[2]]
-	medoidmelt[band=="rmse", band := tstrsplit(variable, "_")[3]]
-	medoidmelt[, metr := tstrsplit(variable, "_")[1]]
-	medoidmelt[metr=="robust",metr:="rmse"]
-	medoidmelt = medoidmelt[band %in% c("blue","green","red","nir","swir1","swir2","bt","ndvi","evi","tcb","tcg","tcw","tcwgd", "nbr", "nbrevi", "bcc","gcc","rcc") | metr %in% c("snowiness", "cloudiness", "seglength", "nbreaks","robust", "elv", "asp", "slp", "swocc", "swrec", "swsea", "swext", "PZI", "GSL")]
-	medoidmelt[is.na(band),band:=metr]
-	setkey(medoidmelt, band)
-	setkey(banddt, band)
-
-	#medoidmelt[,lambda := assignLambda(band), by=1:nrow(medoidmelt)]
-	medoidmelt = medoidmelt[banddt]
-
-	medoidmelt[,value:=as.numeric(value)]
-#
-#	medoidmelt[metr == "nbreaks", value:= (value+1)/10]
-#	medoidmelt[metr == "rmse", value := value/1000]
-#	medoidmelt[metr == "seglength", value:= value/10000]
-#	medoidmelt[metr == "trnd", value:= value*10000]
-#	medoidmelt[metr == "asp", value:= value/360]
-#	medoidmelt[metr == "elv", value:= value/10000]
-#	medoidmelt[metr == "slp", value:= value*100]
-#	medoidmelt[metr == "swocc", value:= value/100]
-#	medoidmelt[metr == "swsea", value:= value/12]
-#	medoidmelt[metr == "swrec", value:= value/100]
-#	medoidmelt[metr == "swext", value:= value/10]
-
-	labdat = unique(medoidmelt[,.(clust,LCMAP)])
-	labdat[, c("x", "y") := .(0.7, 0.8)]
-
-  kstart = seq(1,k,by=5)	
-
-	for(i in kstart){
-  	kend   = i + 4
-		if(kend > k)kend=k	
-		ggsave(plot=clustPlotter(i:kend, medoidmelt), paste0("../../plots/clusters_",rfid,"/clusterProfiles_c",k,"_",i,"_",kend,".png"), 
-					 width=8, height=6, units="in")
-	}
+load("../../data/rf/featureNames_20180416_ecozoneNoBC")
+clusters_pam = get(load("../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_d4_big"))
+coefs_labels=get(load('../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_dt'))
 }
-
-dir.create(paste0("../../plots/clusters_",rfid))
-generateProfiles(clusters_pam)
+## water
+#coefs_labels[(surfaceType == 1) | 
+#						 (density == 1 & under == 4),# | 
+##						 (wetlandFlag == 3),
+#   	  			 LCMAP := "Water"]
+##coefs_labels[(surfaceType == 2 & landUse == 1),
+##						 LCMAP := "Developed"]
+#coefs_labels[(landUse == 2 | landUse == 3), 
+#						 LCMAP := "Cropland"]
+#coefs_labels[(surfaceType == 2 & landUse != 1) |
+#						 (surfaceType == 3 & density %in% c(1) & under == 1),
+#					   LCMAP := "Barren"]
+#coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype %in% c(1) & density %in% c(2,3)) & wetlandFlag == 1,
+#						 LCMAP := "Decid Forest"]
+#coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype %in% c(3) & density %in% c(2,3)) & wetlandFlag == 1,
+#						 LCMAP := "Mixed Forest"]
+#coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype == 2 & density %in% c(3)) & wetlandFlag == 1,
+#						 LCMAP := "Everg Forest"]
+#coefs_labels[(surfaceType == 3 & vegForm == 4 & phenotype == 2 & density %in% c(2,1)) & wetlandFlag == 1 & under == 1,
+#						 LCMAP := "Peat Woodland"]
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(2,3) & landUse == 5),
+#						 LCMAP := "Post-fire"]
+#coefs_labels[(surfaceType == 3 & vegForm == 4 & landUse == 5),
+#						 LCMAP := "Secondary Forest"]
+## coefs_labels[(surfaceType == 4 & vegForm == 3 & phenotype == 2 & density == 1 & wetlandFlag == 1),
+## 							LCMAP := "Sparse Dry Forest"]
+#
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(3) & under %in% c(2,3) & density %in% c(2,1) & wetlandFlag == 1),
+#						 LCMAP := "Open Shrubs"]
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(1,2) & density %in% c(1,2) & under == 1),
+#						 LCMAP := "Sparsely Vegetated"]
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(2,3) & landUse == 5),
+#						 LCMAP := "Post-fire"]
+## coefs_labels[(surfaceType == 4 & vegForm == 3 & phenotype == 2 & density == 1 & wetlandFlag == 2),
+## 							LCMAP := "Sparse Wetland Forest"]
+#
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(2) & density %in% c(2,3) & wetlandFlag == 1), 
+#						 LCMAP := "Grass"]
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(3) & density %in% c(2,3) & wetlandFlag == 1),
+#						 LCMAP := "Shrub"]
+#coefs_labels[(wetlandFlag == 3),
+#						 LCMAP := "Shallow Lake"]
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(1) & density %in% c(1,2,3) & wetlandFlag == 2),
+#						 LCMAP := "Bog"]
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(2) & density %in% c(1,2,3) & wetlandFlag == 2),
+#						 LCMAP := "Fen"]
+#coefs_labels[(surfaceType == 3 & vegForm %in% c(3,4) & density %in% c(1,2,3) & wetlandFlag == 2),
+#						 LCMAP := "Woody Wetland"]
+##coefs_labels[(surfaceType == 3 & vegForm %in% c(1,2,3,4) & density %in% c(1,2,3) & wetlandFlag == 2),
+##						 LCMAP := "Wetland"]
+##coefs_labels[(surfaceType == 4 | snowiness > 0.7),
+##						 LCMAP := "Snow/ice"]
+##coefs_labels[landUse == 5,
+##						 LCMAP := "Disturbed/transitional"]
+#
+#coefs_labels[, LCMAP := as.factor(LCMAP)]
+#
+#
+#generateProfiles = function(clusters){
+#
+#	# examine medoid spectral signatures
+#	#medoids = clusters$medoids
+#	medoids = clusters$final.clust$id.med
+#	k = length(unique(clusters$final.clust$clustering))
+#	print(paste0("profiling: ", k))
+#
+#	medoiddt_l = lapply(as.numeric(medoids), function(x)return(coefs_labels[x,]))
+#	medoiddt = rbindlist(medoiddt_l)
+#	medoiddt[,med:=medoids]
+#	medoiddt[,clust:=1:length(unique(clusters$final.clust$clustering))]
+#
+#	medoidmelt = melt(medoiddt,
+#										id.vars=c('LCMAP','clust'),
+#										measure.vars = c(featureNames[!grepl("ecozone",featureNames)]))
+#
+#	# get some feature info and normalize them
+#	medoidmelt[, band := tstrsplit(variable, "_")[2]]
+#	medoidmelt[band=="rmse", band := tstrsplit(variable, "_")[3]]
+#	medoidmelt[, metr := tstrsplit(variable, "_")[1]]
+#	medoidmelt[metr=="robust",metr:="rmse"]
+#	medoidmelt = medoidmelt[band %in% c("blue","green","red","nir","swir1","swir2","bt","ndvi","evi","tcb","tcg","tcw","tcwgd", "nbr", "nbrevi", "bcc","gcc","rcc") | metr %in% c("snowiness", "cloudiness", "seglength", "nbreaks","robust", "elv", "asp", "slp", "swocc", "swrec", "swsea", "swext", "PZI", "GSL")]
+#	medoidmelt[is.na(band),band:=metr]
+#	setkey(medoidmelt, band)
+#	setkey(banddt, band)
+#
+#	#medoidmelt[,lambda := assignLambda(band), by=1:nrow(medoidmelt)]
+#	medoidmelt = medoidmelt[banddt]
+#
+#	medoidmelt[,value:=as.numeric(value)]
+##
+##	medoidmelt[metr == "nbreaks", value:= (value+1)/10]
+##	medoidmelt[metr == "rmse", value := value/1000]
+##	medoidmelt[metr == "seglength", value:= value/10000]
+##	medoidmelt[metr == "trnd", value:= value*10000]
+##	medoidmelt[metr == "asp", value:= value/360]
+##	medoidmelt[metr == "elv", value:= value/10000]
+##	medoidmelt[metr == "slp", value:= value*100]
+##	medoidmelt[metr == "swocc", value:= value/100]
+##	medoidmelt[metr == "swsea", value:= value/12]
+##	medoidmelt[metr == "swrec", value:= value/100]
+##	medoidmelt[metr == "swext", value:= value/10]
+#
+#	labdat = unique(medoidmelt[,.(clust,LCMAP)])
+#	labdat[, c("x", "y") := .(0.7, 0.8)]
+#
+#  kstart = seq(1,k,by=5)	
+#
+#	for(i in kstart){
+#  	kend   = i + 4
+#		if(kend > k)kend=k	
+#		ggsave(plot=clustPlotter(i:kend, medoidmelt), paste0("../../plots/clusters_",rfid,"/clusterProfiles_c",k,"_",i,"_",kend,".png"), 
+#					 width=8, height=6, units="in")
+#	}
+#}
+#
+#generateProfiles(clusters_pam)
+dir.create(paste0("../../plots/clusters_",rfid),showWarnings=F,recursive=T)
 
 generateHistograms = function(clusters, clustrange){
 
@@ -303,7 +309,7 @@ generateHistograms(clusters_pam,31:35)
 generateHistograms(clusters_pam,36:40)
 generateHistograms(clusters_pam,41:45)
 generateHistograms(clusters_pam,46:50)
-generateHistograms(clusters_pam,50:55)
+generateHistograms(clusters_pam,51:55)
 
 
 ### plot confusion matrix

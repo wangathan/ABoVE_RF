@@ -235,7 +235,7 @@ for(b in thebands){
 }
 
 coefsnames = names(coefs_labels)
-featureNames = coefsnames[!grepl("lat|lon|snowiness|cloudiness|snowmelt|snowfall|ecozone|GSL|mergeid|unchanging|rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|surfaceType|vegForm|phenotype|density|under|wetlandFlag|landUse|confidence|skipped|overlap|postyear|year",coefsnames)]
+featureNames = coefsnames[!grepl("lat|lon|snowiness|cloudiness|snowmelt|snowfall|GSL|mergeid|unchanging|rowi|V1|px|py|start|end|^br$|a0_|c1_|a1_|b1_|a2_|b2_|a3_|b3_|magnitude_|tile|set|pixel|yr_start|yr_end|yr_br|^rmse|^i$|samp|surfaceType|vegForm|phenotype|density|under|wetlandFlag|landUse|confidence|skipped|overlap|postyear|year",coefsnames)]
 
 # tree clust is okay with missing values?
 #coefs_labels = na.omit(coefs_labels)
@@ -244,7 +244,7 @@ featureNames = coefsnames[!grepl("lat|lon|snowiness|cloudiness|snowmelt|snowfall
 #save(featureNames, file = "../../data/rf/featureNames_20180327")
 #save(featureNames, file = "../../data/rf/featureNames_20180411")
 #save(featureNames, file = "../../data/rf/featureNames_20180415")
-save(featureNames, file = "../../data/rf/featureNames_20180415_noGeoNoBC")
+save(featureNames, file = "../../data/rf/featureNames_20180416_ecozoneNoBC")
 
 # deal with some NA
 
@@ -270,7 +270,7 @@ coefs_labels[,PZI := ifelse(is.na(PZI),mean(PZI, na.rm=T), PZI),by=tile]
 #}
 
 #coefs_labels = na.omit(coefs_labels)
-save(coefs_labels, file="../../data/rf/clusters/tc_20180416_noGeoNoBC_dt")
+save(coefs_labels, file="../../data/rf/clusters/tc_20180416_ecozoneNoBC_dt")
 
 print("CLUSTERING")
 print(Sys.time())
@@ -282,15 +282,15 @@ coefs_tc <- treeClust(coefs_labels[,featureNames,with=F],
 										 d.num = 4,
 										 control = treeClust.control(parallelnodes = detectCores()),
 										 final.algorithm = "pam",
-										 k = 55)
+										 k = 50)
 )
 
 # sub indicates this is just for the labelled points (n = 6k)
 #save(coefs_tc, file = "../../data/rf/clusters/tc_20180319_k50_d4")
 #save(coefs_tc, file = "../../data/rf/clusters/tc_20180327_k50_d4_big")
 #save(coefs_tc, file = "../../data/rf/clusters/tc_20180411_k50_d4_big")
-save(coefs_tc, file = "../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_d4_big")
-#save(coefs_tc, file = "../../data/rf/clusters/tc_20180415_noBC_k55_d4_big")
+save(coefs_tc, file = "../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_d4_big")
+#save(coefs_tc, file = "../../data/rf/clusters/tc_20180415_noBC_k50_d4_big")
 #save(coefs_tc, file = "../../data/rf/clusters/tc_20180219_k30")
 
 print("CLUSTERS SAVED")
@@ -315,11 +315,11 @@ clust13_pred_r = predict(clustrang13, clusttest[,featureNames,with=F])
 clust13_prob_r = predict(clustrang13, clusttest[,featureNames,with=F],type="vote")
 conf_rang13 = confusionMatrix(clust13_pred_r, clusttest$tcCluster)
 
-save(conf_rang13, file = "../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_conf")
-save(coefs_labels, file="../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_dt")
-save(clusttest, file="../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_dt_test")
-save(clusttrain, file="../../data/rf/clusters/tc_20180416_noGeoNoBC_k55_dt_train")
-save(clustrang13, file= "../../data/rf/model/tc_20180416_noGeoNoBC_k55_pam_rf")
+save(conf_rang13, file = "../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_conf")
+save(coefs_labels, file="../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_dt")
+save(clusttest, file="../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_dt_test")
+save(clusttrain, file="../../data/rf/clusters/tc_20180416_ecozoneNoBC_k50_dt_train")
+save(clustrang13, file= "../../data/rf/model/tc_20180416_ecozoneNoBC_k50_pam_rf")
 
 # importance
 #imp = sort(importance(clustrang13),decreasing=T)

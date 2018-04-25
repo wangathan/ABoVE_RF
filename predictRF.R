@@ -422,7 +422,8 @@ system.time(
 						test <- mclapply(1:length(ffiles), predictLCMAP, ti = ti,mc.cores=detectCores(), mc.preschedule=F)
 )
 
-predfail = which(unlist(lapply(test,class))=="try-error")
+predfail = which(sapply(test,class)=="try-error")
+#predfail = which(unlist(lapply(test,class))=="try-error")
 counter=1
 while(length(predfail) > 0){
 	if(counter > 12){

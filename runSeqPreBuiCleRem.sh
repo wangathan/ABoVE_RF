@@ -1,4 +1,5 @@
 #!/bin/bash
+#$ -j y
 
 ## A script to take a tile and submit prediction, annual clean up, 
 ##	raster building, and remapping in sequence.

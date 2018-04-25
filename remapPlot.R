@@ -124,7 +124,7 @@ if(rfid == "tc_20180416_noGeo_k55_pam_rf"){ # after a tour of street view #2
   
   remapdt[lcmap %in% c(27,39,53), newlc:= 5] #Low Shrub                          
   remapdt[lcmap %in% c(19,23,50), newlc:= 6] #High Shrub                          
-  remapdt[lcmap %in% c(7,18,21,22,40,41,51,54), newlc:= 7] #Sparse Shrub                          
+  remapdt[lcmap %in% c(7,18,21,22,40,41,54), newlc:= 7] #Sparse Shrub                          
   remapdt[lcmap %in% c(14), newlc:= 8] #Grass                          
   remapdt[lcmap %in% c(42), newlc:=9] #Tussock Tundra
   remapdt[lcmap %in% c(8,26,28,36,37,48), newlc:= 10] #Sparse Grass/Lichen                
@@ -133,8 +133,8 @@ if(rfid == "tc_20180416_noGeo_k55_pam_rf"){ # after a tour of street view #2
   remapdt[lcmap %in% c(32,52), newlc:= 12] #Bog                               
   remapdt[lcmap %in% c(12), newlc:= 13] #Shallows                            
 
-  remapdt[lcmap %in% c(9,13,17,29,43,45,55), newlc:= 14] #Barren                        
-  remapdt[lcmap %in% c(5,6,24,33,38,47), newlc:= 15] #Water                             
+  remapdt[lcmap %in% c(13,17,29,43,45,51,55), newlc:= 14] #Barren                        
+  remapdt[lcmap %in% c(5,6,9,24,33,38,47), newlc:= 15] #Water                             
                                                                             
   lcmap[] = remapdt$newlc                                                   
 
@@ -145,7 +145,7 @@ if(rfid == "tc_20180416_noGeo_k55_pam_rf"){ # after a tour of street view #2
               #"#336633", #evergW
 							#"#66DD66", #decidW
 							#"#559955", #mixedW
-							"#8AC181", #bogW
+							"#51684E", #bogW
 
 							"#845A06", #low shrub
 							"#AD3714", #high shrub
@@ -154,7 +154,7 @@ if(rfid == "tc_20180416_noGeo_k55_pam_rf"){ # after a tour of street view #2
 							"#BAA22A", #tussock
 							"#DFE5A2", #sparse veg low
 
-							"#4DC183", #Fen
+							"#61E2AA", #Fen
 							"#D18523", #Bog
 							"#75ACFF", #Shallows
 

@@ -17,6 +17,10 @@ checker=function(tile,type){
     inpath = feats[grep(tile,feats)]
     numfi = length(list.files(inpath))
   }
+  if(type=="ccdc"){
+    inpath = feath[grep(tile,feath)]
+    numfi = length(list.files(inpath))
+  }
   if(type=="preds"){
     inpath = preds[grep(tile,preds)]
     numfi = length(list.files(inpath))
@@ -35,10 +39,17 @@ preds= list.files(paste0("../../data/rf/predict_",rfid),
                    pattern="^Bh.*[0-9]$",
                    full.names=T)
 
+feath = list.files(paste0("../../data/ccdc_feathers"),
+                   pattern="^Bh.*[0-9]$",
+                   full.names=T)
+
 featdt = data.table(tilefeats = basename(feats))
 
 featcompleted=unlist(mclapply(featdt$tilefeats,checker,type="feats",mc.cores=detectCores()))
 featdt[,numfeat:=featcompleted]
+
+ccdccompleted=unlist(mclapply(featdt$tilefeats,checker,type="ccdc",mc.cores=detectCores()))
+featdt[,numccdc := ccdccompleted]
 
 predcompleted=unlist(mclapply(featdt$tilefeats,checker,type="preds",mc.cores=detectCores()))
 featdt[,numpred := predcompleted]
