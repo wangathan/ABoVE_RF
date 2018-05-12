@@ -36,20 +36,20 @@ catalogFile = function(fi){
   prdrow[lcmap %in% c(1,15,16,31), remap:= 1] #Everg F                           
   prdrow[lcmap %in% c(25,34), remap:= 2] #Decid F                           
   prdrow[lcmap %in% c(20,30), remap:= 3] #Mixed F                           
-  prdrow[lcmap %in% c(3,4,44, 49), remap:= 4] #Bog Forest                          
+  prdrow[lcmap %in% c(3,4,44,49,52,53), remap:= 4] #Bog Forest                          
   
-  prdrow[lcmap %in% c(27,39,53), remap:= 5] #Low Shrub                          
+  prdrow[lcmap %in% c(27,39), remap:= 5] #Low Shrub                          
   prdrow[lcmap %in% c(19,23,50), remap:= 6] #High Shrub                          
-  prdrow[lcmap %in% c(7,18,21,22,41,54), remap:= 7] #Sparse Shrub                          
+  prdrow[lcmap %in% c(7,18,21,22,41,51,54), remap:= 7] #Sparse Shrub                          
   prdrow[lcmap %in% c(14,40), remap:= 8] #Grass                          
   prdrow[lcmap %in% c(42), remap:=9] #Tussock Tundra
   prdrow[lcmap %in% c(8,26,28,36,37,48), remap:= 10] #Sparse Grass/Lichen                
                                                                             
   prdrow[lcmap %in% c(2,10,11,35,46), remap:= 11] #Fen                            
-  prdrow[lcmap %in% c(32,52), remap:= 12] #Bog                               
+  prdrow[lcmap %in% c(32), remap:= 12] #Bog                               
   prdrow[lcmap %in% c(12), remap:= 13] #Shallows                            
 
-  prdrow[lcmap %in% c(13,17,29,43,45,51,55), remap:= 14] #Barren                        
+  prdrow[lcmap %in% c(13,17,29,43,45,55), remap:= 14] #Barren                        
   prdrow[lcmap %in% c(5,6,9,24,33,38,47), remap:= 15] #Water                             
   prdrow[, numbreaks := .N-1, by = pixel]
 
